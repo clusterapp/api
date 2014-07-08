@@ -3,5 +3,5 @@ module.exports = function(app) {
     res.render('index', { title: 'Express' });
   });
 
-  app.use('/users', require('./users'));
+  app.use('/users', require('./users').router);
 };
