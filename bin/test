@@ -6,7 +6,7 @@ var watcher = chokidar.watch(['routes/', 'test/'], {ignored: /[\/\\]\./, persist
 
 watcher.on('all', function(event, path) {
   console.log(path, 'changed');
-  exec('npm run test_unit', function (error, stdout, stderr) {
+  exec('npm test', function (error, stdout, stderr) {
     console.log(stdout);
   });
 });
