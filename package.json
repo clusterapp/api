@@ -27,6 +27,7 @@
     "chokidar": "^0.8.2",
     "expect.js": "^0.3.1",
     "mocha": "^1.20.1",
+    "proxyquire": "^1.0.1",
     "supertest": "^0.13.0"
   }
 }
