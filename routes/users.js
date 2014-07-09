@@ -1,12 +1,22 @@
 // all these routes are nested under /users
 
 var express = require('express');
+var User = require('../models/user_model');
 
 var userRoutes = {
-  '/': {
+  '/findOrCreate': {
     method: 'get',
     fn: function(req, res) {
-      res.json({ foo: 'hello world' });
+      var redditName = req.query.redditName;
+      User.findOne({ redditName: redditName }, function(e, user) {
+        if(user) {
+          res.json(user.serialize());
+        } else {
+          new User({ redditName: redditName }).save(function(e, user) {
+            res.json(user.serialize());
+          });
+        }
+      });
     }
   }
 };

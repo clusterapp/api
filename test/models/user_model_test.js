@@ -30,7 +30,7 @@ describe('User model', function() {
       timekeeper.reset();
     });
 
-    it('persists it to the database', function() {
+    it('persists it to the database', function(done) {
       var user = new User({ redditName: 'jack' });
       var id = user.id;
       var time = Date.now();
@@ -39,7 +39,15 @@ describe('User model', function() {
       user.updateLastActive(function(e, u) {
         expect(u.lastActive.toString()).to.eql(new Date(time).toString());
         timekeeper.reset();
+        done();
       });
+    });
+  });
+
+  describe('#serialize', function() {
+    it('only contains fields we want exposed', function() {
+      var user = new User({ redditName: 'jack' }).serialize();
+      expect(Object.keys(user)).to.eql(['id', 'lastActive', 'redditName']);
     });
   });
 

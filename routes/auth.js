@@ -45,7 +45,7 @@ var authRoutes = {
   '/reddit/success': {
     method: 'get',
     fn: function(req, res, next) {
-      res.redirect(req.session.redirect + '?data=' + req.user._raw);
+      res.redirect(req.session.redirect + '?data=' + req.user._raw + '&hex=' + req.session.state);
     }
   },
   '/reddit/failure': {
