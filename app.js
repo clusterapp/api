@@ -7,8 +7,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
-var passport = require('passport');
-var RedditStrategy = require('passport-reddit').Strategy;
+
 
 
 var app = express();
@@ -31,32 +30,7 @@ app.use(session({
   secret: 'keyboard cat'
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
-});
-
-var authCodes = require('./keys.json');
-
-var env = process.env.NODE_ENV || 'development';
-var callbackUrl = (env == 'development' || env == 'test' ?
-                   'http://127.0.0.1:3000/auth/reddit/callback' :
-                   'http://192.241.141.125/auth/reddit/callback'
-);
-
-passport.use(new RedditStrategy({
-  clientID: authCodes[env].redditKey,
-  clientSecret: authCodes[env].redditSecret,
-  callbackURL: callbackUrl
-}, function(accessToken, refreshToken, profile, done) {
-  return done(null, profile);
-}));
+require('./passport-config')(app);
 
 // initialise all the routes
 require('./routes')(app);
