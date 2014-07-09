@@ -27,7 +27,9 @@ app.use(session({
     port: 6379,
     db: 2
   }),
-  secret: 'keyboard cat'
+  secret: 'keyboard cat',
+  saveUninitialized: true,
+  resave: true
 }));
 
 require('./passport-config')(app);
