@@ -18,6 +18,11 @@ var authRoutes = {
   '/reddit': {
     method: 'get',
     fn: function(req, res, next) {
+      if(!req.query || !req.query.redirect) {
+        return res.json({ error: 'No redirect param given' });
+      };
+
+      req.session.redirect = req.query.redirect;
       req.session.state = crypto.randomBytes(32).toString('hex');
       passport.authenticate('reddit', {
         state: req.session.state
@@ -40,8 +45,7 @@ var authRoutes = {
   '/reddit/success': {
     method: 'get',
     fn: function(req, res, next) {
-      console.log(req.user);
-      res.json(_.extend({ authenticated: true }, req.user._json));
+      res.redirect(req.session.redirect + '?data=' + req.user._raw);
     }
   },
   '/reddit/failure': {

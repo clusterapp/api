@@ -45,20 +45,16 @@ passport.deserializeUser(function(obj, done) {
 var authCodes = require('./keys.json');
 
 var env = process.env.NODE_ENV || 'development';
-console.log('ENV IS', env);
-var callbackUrl = (env == 'development' ?
+var callbackUrl = (env == 'development' || env == 'test' ?
                    'http://127.0.0.1:3000/auth/reddit/callback' :
                    'http://192.241.141.125/auth/reddit/callback'
 );
-
-console.log(callbackUrl);
 
 passport.use(new RedditStrategy({
   clientID: authCodes[env].redditKey,
   clientSecret: authCodes[env].redditSecret,
   callbackURL: callbackUrl
 }, function(accessToken, refreshToken, profile, done) {
-  console.log('passport args', arguments);
   return done(null, profile);
 }));
 
