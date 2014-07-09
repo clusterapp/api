@@ -16,7 +16,7 @@ describe('user routes', function() {
     it('errors if no redditName given', function() {
       callRoute('/findOrCreate', {}, {
         json: function(d) {
-          expect(Object.keys(d)).to.eql(['error']);
+          expect(d).to.eql({ error: 'missing redditName param' });
         }
       });
     });
@@ -24,7 +24,10 @@ describe('user routes', function() {
       var user = new User({ redditName: 'foo' });
       user.save(function(e, user) {
         var id = user.id;
-        callRoute('/findOrCreate', { query: { redditName: 'foo' } }, {
+        callRoute('/findOrCreate', {
+          query: { redditName: 'foo', hex: 123 },
+          session: { state: 123 }
+        }, {
           json: function(d) {
             expect(d.id).to.eql(id);
             expect(d.redditName).to.eql('foo');
@@ -34,8 +37,22 @@ describe('user routes', function() {
       });
     });
 
+    it('errors with invalid or missing hex', function() {
+      callRoute('/findOrCreate', {
+        query: { hex: 123, redditName: 'foo'},
+        session: { state: 456 }
+      }, {
+        json: function(d) {
+          expect(d).to.eql({ error: 'invalid hex' });
+        }
+      });
+    });
+
     it('creates a user if they do not exist', function(done) {
-      callRoute('/findOrCreate', { query: { redditName: 'foo' } }, {
+      callRoute('/findOrCreate', {
+        query: { redditName: 'foo', hex: 123 },
+        session: { state: 123 }
+      }, {
         json: function(d) {
           expect(d.id).to.be.ok();
           expect(d.redditName).to.eql('foo');
