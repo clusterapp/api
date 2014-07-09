@@ -7,6 +7,9 @@ var userRoutes = {
   '/findOrCreate': {
     method: 'get',
     fn: function(req, res) {
+      if(!req.query || !req.query.redditName) {
+        return res.json({ error: 'missing redditName param' });
+      };
       var redditName = req.query.redditName;
       User.findOne({ redditName: redditName }, function(e, user) {
         if(user) {

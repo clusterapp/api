@@ -13,6 +13,13 @@ var callRoute = function(route, req, res) {
 
 describe('user routes', function() {
   describe('findOrCreate', function() {
+    it('errors if no redditName given', function() {
+      callRoute('/findOrCreate', {}, {
+        json: function(d) {
+          expect(Object.keys(d)).to.eql(['error']);
+        }
+      });
+    });
     it('returns a user object from the DB', function(done) {
       var user = new User({ redditName: 'foo' });
       user.save(function(e, user) {
