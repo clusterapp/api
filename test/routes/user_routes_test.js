@@ -66,7 +66,7 @@ describe('user routes', function() {
     it('errors if no user found', function() {
       callRoute('/updateLastActive', {
         query: { token: 123, id: '123' },
-        session: { state: 123 }
+        session: { state: 123, userId: '123' }
       }, {
         json: function(d) {
           expect(d).to.eql({ error: 'no user found' });

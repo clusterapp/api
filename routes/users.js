@@ -3,19 +3,27 @@
 var express = require('express');
 var User = require('../models/user_model');
 
+var failOnParams = function(req, res) {
+  var failed = false;
+  if(!req.query || !req.query.id) {
+    res.json({ error: 'missing id param' });
+    failed = true;
+  } else if(!req.query || !req.query.token || req.query.token != req.session.state) {
+    res.json({ error: 'invalid or missing token' });
+    failed = true;
+  } else if(req.query.id != req.session.userId) {
+    res.json({ error: 'user and token do not match' });
+    failed = true;
+  };
+
+  return failed;
+};
+
 var userRoutes = {
   '/': {
     method: 'get',
     fn: function(req, res) {
-      if(!req.query || !req.query.id) {
-        return res.json({ error: 'missing id param' });
-      };
-      if(!req.query || !req.query.token || req.query.token != req.session.state) {
-        return res.json({ error: 'invalid or missing token' });
-      };
-      if(req.query.id != req.session.userId) {
-        return res.json({ error: 'user and token do not match' });
-      };
+      if(failOnParams(req, res)) return;
 
       User.findOne({ _id: req.query.id }, function(e, user) {
         if(user) {
@@ -29,12 +37,8 @@ var userRoutes = {
   '/updateLastActive': {
     method: 'post',
     fn: function(req, res) {
-      if(!req.query || !req.query.id) {
-        return res.json({ error: 'missing id param' });
-      }
-      if(!req.query || !req.query.token || req.query.token != req.session.state) {
-        return res.json({ error: 'invalid or missing token' });
-      }
+      if(failOnParams(req, res)) return;
+
       User.findById(req.query.id, function(e, user) {
         if(user) {
           if(user.id == req.session.userId) {
