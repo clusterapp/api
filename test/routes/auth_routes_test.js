@@ -44,11 +44,11 @@ describe('auth routes', function() {
   });
 
   describe('/reddit/success', function() {
-    it('redirects to the redirect property on the session with the user data and the hex', function() {
+    it('redirects to the redirect property on the session with the user data and the token', function() {
       var req = { session: { redirect: 'f', state: 'b' }, user: { _raw: 'foo' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(loc).to.eql('f?data=foo&hex=b');
+          expect(loc).to.eql('f?data=foo&token=b');
         }
       });
     });
