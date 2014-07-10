@@ -24,6 +24,26 @@ var userRoutes = {
         }
       });
     }
+  },
+  '/updateLastActive': {
+    method: 'post',
+    fn: function(req, res) {
+      if(!req.query || !req.query.id) {
+        return res.json({ error: 'missing id param' });
+      }
+      if(!req.query || !req.query.token || req.query.token != req.session.state) {
+        return res.json({ error: 'invalid or missing token' });
+      }
+      User.findById(req.query.id, function(e, user) {
+        if(user) {
+          user.updateLastActive(function(e, u) {
+            res.json(u.serialize());
+          });
+        } else {
+          res.json({ error: 'no user found' });
+        }
+      });
+    }
   }
 };
 

@@ -13,8 +13,8 @@ userSchema.methods.updateLastActive = function(cb) {
 
 userSchema.methods.serialize = function() {
   return {
-    id: this.id,
-    lastActive: this.lastActive,
+    id: this.id.toString(),
+    lastActive: this.lastActive.toString(),
     redditName: this.redditName
   }
 };
