@@ -5,15 +5,6 @@ var crypto = require('crypto');
 var passport = require('passport');
 var _ = require('underscore');
 
-
-
-// exports.logout = function(req, res) {
-//   req.session.userid = null;
-//   req.session.username = null;
-//   req.logout();
-//   res.redirect('/');
-// };
-
 var authRoutes = {
   '/reddit': {
     method: 'get',
@@ -45,7 +36,7 @@ var authRoutes = {
   '/reddit/success': {
     method: 'get',
     fn: function(req, res, next) {
-      res.redirect(req.session.redirect + '?data=' + req.user._raw);
+      res.redirect(req.session.redirect + '?data=' + req.user._raw + '&token=' + req.session.state);
     }
   },
   '/reddit/failure': {
