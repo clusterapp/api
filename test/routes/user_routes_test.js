@@ -25,7 +25,7 @@ describe('user routes', function() {
 
         callRoute('/updateLastActive', {
           query: { token: 123, id: user.id } ,
-          session: { state: 123 }
+          session: { state: 123, userName: 'jack' }
         }, {
           json: function(serialized) {
             expect(serialized.lastActive).to.eql(new Date(time).toString());
@@ -46,6 +46,23 @@ describe('user routes', function() {
         }
       });
     });
+
+    it('errors if the user is not the one in session', function(done) {
+      var user = new User({ redditName: 'jack' });
+      user.save(function(e, user) {
+        callRoute('/updateLastActive', {
+          query: { token: 123, id: user.id },
+          session: { state: 123, userName: 'foo' }
+        }, {
+          json: function(d) {
+            expect(d).to.eql({ error: 'user and token do not match' });
+            done();
+          }
+        });
+      });
+
+    });
+
     it('errors if no user found', function() {
       callRoute('/updateLastActive', {
         query: { token: 123, id: '123' },
@@ -72,7 +89,7 @@ describe('user routes', function() {
         var id = user.id;
         callRoute('/findOrCreate', {
           query: { redditName: 'foo', token: 123 },
-          session: { state: 123 }
+          session: { state: 123, userName: 'foo' }
         }, {
           json: function(d) {
             expect(d.id).to.eql(id);
@@ -99,7 +116,7 @@ describe('user routes', function() {
   it('creates a user if they do not exist', function(done) {
     callRoute('/findOrCreate', {
       query: { redditName: 'foo', token: 123 },
-      session: { state: 123 }
+      session: { state: 123, userName: 'foo' }
     }, {
       json: function(d) {
         expect(d.id).to.be.ok();
@@ -111,6 +128,18 @@ describe('user routes', function() {
         });
       }
     });
+
+    it('does not allow the req if the user given doesnt match the token', function() {
+      callRoute('/findOrCreate', {
+        query: { redditName: 'foo', token: 123 },
+        session: { state: 123, userName: 'bar' }
+      }, {
+        json: function(d) {
+          expect(d).to.eql({ error: 'user and token do not match' });
+        }
+      });
+    });
+
   });
 });
 

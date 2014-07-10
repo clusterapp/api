@@ -13,6 +13,10 @@ var userRoutes = {
       if(!req.query || !req.query.token || req.query.token != req.session.state) {
         return res.json({ error: 'invalid or missing token' });
       };
+      if(req.query.redditName != req.session.userName) {
+        return res.json({ error: 'user and token do not match' });
+      };
+
       var redditName = req.query.redditName;
       User.findOne({ redditName: redditName }, function(e, user) {
         if(user) {
@@ -36,9 +40,13 @@ var userRoutes = {
       }
       User.findById(req.query.id, function(e, user) {
         if(user) {
-          user.updateLastActive(function(e, u) {
-            res.json(u.serialize());
-          });
+          if(user.redditName == req.session.userName) {
+            user.updateLastActive(function(e, u) {
+              res.json(u.serialize());
+            });
+          } else {
+            res.json({ error: 'user and token do not match' });
+          }
         } else {
           res.json({ error: 'no user found' });
         }
