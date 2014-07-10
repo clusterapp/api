@@ -25,7 +25,7 @@ describe('user routes', function() {
       user.save(function(e, user) {
         var id = user.id;
         callRoute('/findOrCreate', {
-          query: { redditName: 'foo', hex: 123 },
+          query: { redditName: 'foo', token: 123 },
           session: { state: 123 }
         }, {
           json: function(d) {
@@ -39,18 +39,18 @@ describe('user routes', function() {
 
     it('errors with invalid or missing hex', function() {
       callRoute('/findOrCreate', {
-        query: { hex: 123, redditName: 'foo'},
+        query: { token: 123, redditName: 'foo'},
         session: { state: 456 }
       }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'invalid hex' });
+          expect(d).to.eql({ error: 'invalid or missing token' });
         }
       });
     });
 
     it('creates a user if they do not exist', function(done) {
       callRoute('/findOrCreate', {
-        query: { redditName: 'foo', hex: 123 },
+        query: { redditName: 'foo', token: 123 },
         session: { state: 123 }
       }, {
         json: function(d) {

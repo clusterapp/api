@@ -10,8 +10,8 @@ var userRoutes = {
       if(!req.query || !req.query.redditName) {
         return res.json({ error: 'missing redditName param' });
       };
-      if(!req.query || !req.query.hex || req.query.hex != req.session.state) {
-        return res.json({ error: 'invalid hex' });
+      if(!req.query || !req.query.token || req.query.token != req.session.state) {
+        return res.json({ error: 'invalid or missing token' });
       };
       var redditName = req.query.redditName;
       User.findOne({ redditName: redditName }, function(e, user) {
