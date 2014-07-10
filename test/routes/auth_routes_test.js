@@ -52,6 +52,15 @@ describe('auth routes', function() {
         }
       });
     });
+
+    it('stores the user name in session', function() {
+      var req = { session: { redirect: 'f', state: 'b' }, user: { _raw: 'foo', name: 'foo' } };
+      callRoute('/reddit/success', req, {
+        redirect: function(loc) {
+          expect(req.session.userName).to.eql('foo');
+        }
+      });
+    });
   });
 
   describe('/reddit/failure', function() {

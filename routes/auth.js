@@ -36,6 +36,7 @@ var authRoutes = {
   '/reddit/success': {
     method: 'get',
     fn: function(req, res, next) {
+      req.session.userName = req.user.name;
       res.redirect(req.session.redirect + '?data=' + req.user._raw + '&token=' + req.session.state);
     }
   },
