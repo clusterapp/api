@@ -25,7 +25,7 @@ describe('user routes', function() {
 
         callRoute('/updateLastActive', {
           query: { token: 123, id: user.id } ,
-          session: { state: 123, userName: 'jack' }
+          session: { state: 123, userId: user.id }
         }, {
           json: function(serialized) {
             expect(serialized.lastActive).to.eql(new Date(time).toString());
@@ -52,7 +52,7 @@ describe('user routes', function() {
       user.save(function(e, user) {
         callRoute('/updateLastActive', {
           query: { token: 123, id: user.id },
-          session: { state: 123, userName: 'foo' }
+          session: { state: 123, userId: 123456999 }
         }, {
           json: function(d) {
             expect(d).to.eql({ error: 'user and token do not match' });

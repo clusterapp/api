@@ -37,7 +37,7 @@ var userRoutes = {
       }
       User.findById(req.query.id, function(e, user) {
         if(user) {
-          if(user.redditName == req.session.userName) {
+          if(user.id == req.session.userId) {
             user.updateLastActive(function(e, u) {
               res.json(u.serialize());
             });
