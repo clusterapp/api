@@ -9,6 +9,11 @@ var auth = proxyquire('../../routes/auth', {
     authenticate: function() {
       return function() {};
     }
+  },
+  '../models/user_model': {
+    findOrCreate: function(name, cb) {
+      return cb(null, { id: 123, redditName: 'jack' });
+    }
   }
 });
 
@@ -44,20 +49,22 @@ describe('auth routes', function() {
   });
 
   describe('/reddit/success', function() {
-    it('redirects to the redirect property on the session with the user data and the token', function() {
-      var req = { session: { redirect: 'f', state: 'b' }, user: { _raw: 'foo' } };
+    it('redirects to the redirect property on the session with the user data and the token', function(done) {
+      var req = { session: { redirect: 'f', state: 'b' }, user: { name: 'jack' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(loc).to.eql('f?data=foo&token=b');
+          expect(loc).to.eql('f?user_id=123&user_name=jack&token=b');
+          done();
         }
       });
     });
 
-    it('stores the user name in session', function() {
-      var req = { session: { redirect: 'f', state: 'b' }, user: { _raw: 'foo', name: 'foo' } };
+    it('stores the user id in session', function(done) {
+      var req = { session: { redirect: 'f', state: 'b' }, user: { name: 'jack' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(req.session.userName).to.eql('foo');
+          expect(req.session.userId).to.eql('123');
+          done();
         }
       });
     });

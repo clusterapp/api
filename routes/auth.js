@@ -4,6 +4,7 @@ var express = require('express');
 var crypto = require('crypto');
 var passport = require('passport');
 var _ = require('underscore');
+var User = require('../models/user_model');
 
 var authRoutes = {
   '/reddit': {
@@ -36,8 +37,10 @@ var authRoutes = {
   '/reddit/success': {
     method: 'get',
     fn: function(req, res, next) {
-      req.session.userName = req.user.name;
-      res.redirect(req.session.redirect + '?data=' + req.user._raw + '&token=' + req.session.state);
+      User.findOrCreate(req.user.name, function(e, user) {
+        req.session.userId = user.id;
+        res.redirect(req.session.redirect + '?user_id=' + user.id.toString() + '&user_name=' + user.redditName + '&token=' + req.session.state);
+      });
     }
   },
   '/reddit/failure': {

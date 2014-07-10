@@ -16,7 +16,7 @@ The redirect will be passed a query string: `?data=USER_RAW_JSON&token=USER_TOKE
 
 ## User
 
-####  GET `/users/findOrCreate?token=TOKEN&redditName=REDDIT_NAME`
+####  GET `/users/?token=TOKEN&id=USER_ID`
 
 Given the user's reddit username and a token (given back to you in the authentication process), this will find or create a user in the database, and return you an object representing the user:
 
