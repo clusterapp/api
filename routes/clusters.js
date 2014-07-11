@@ -38,16 +38,8 @@ var clusterRoutes = {
       // todo: this behaviour will change if cluster is private
       validateParams(req, res, function(valid) {
         if(!valid) return;
-        Cluster.findById(req.query.id, function(e, cluster) {
-          if(cluster) {
-            if(cluster.public || cluster.owner == req.query.userId || cluster.admins.indexOf(req.query.userId) > -1) {
-              res.json(cluster.serialize());
-            } else {
-              res.json(ERRORS.USER_PERMISSIONS_WRONG());
-            }
-          } else {
-            res.json(ERRORS.NO_CLUSTER_FOUND());
-          }
+        Cluster.userHasPermission(req.query.userId, req.query.id, function(hasPermission, cluster) {
+          res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
         });
       });
     }

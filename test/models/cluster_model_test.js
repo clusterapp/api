@@ -23,4 +23,58 @@ describe('Cluster model', function() {
       });
     });
   });
+
+  describe('.userHasPermission', function() {
+    it('gives permission if cluster is public', function(done) {
+      new Cluster({ public: true }).save(function(e, cluster) {
+        Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
+          expect(res).to.be(true);
+          done();
+        });
+      });
+    });
+
+
+    it('does not gives perms when private if user is not admin or owner', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new Cluster({ public: false }).save(function(e, cluster) {
+          Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
+            expect(res).to.be(false);
+            done();
+          });
+        });
+      });
+    });
+
+    it('deals with no user id', function(done) {
+      new Cluster({ public: false }).save(function(e, cluster) {
+        Cluster.userHasPermission(undefined, cluster.id, function(res) {
+          expect(res).to.be(false);
+          done();
+        });
+      });
+    });
+
+    it('gives perms when private if user is admin', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new Cluster({ name: 'foo', admins: [user], public: false }).save(function(e, cluster) {
+          Cluster.userHasPermission(user.id, cluster.id, function(res) {
+            expect(res).to.be(true);
+            done();
+          });
+        });
+      });
+    });
+
+    it('gives perms when private if user is owner', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
+          Cluster.userHasPermission(user.id, cluster.id, function(res) {
+            expect(res).to.be(true);
+            done();
+          });
+        });
+      });
+    });
+  });
 });

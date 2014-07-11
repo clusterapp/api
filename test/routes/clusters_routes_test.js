@@ -46,7 +46,7 @@ describe('cluster routes', function() {
             query: { id: cluster.id, token: user.token, userId: '53c00d6d6ccaa6cb091bec4f' }
           }, {
             json: function(d) {
-              expect(d).to.eql({ error: 'user does not have permission to view cluster' });
+              expect(d).to.eql({ error: 'no cluster found' });
               done();
             }
           });
