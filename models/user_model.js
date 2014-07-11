@@ -24,6 +24,16 @@ userSchema.statics.findOrCreate = function(name, cb) {
   });
 };
 
+userSchema.statics.createWithToken = function(opts, cb) {
+  var user = new User(opts);
+  user.save(function(e, user) {
+    if(e) return cb(e);
+    user.saveNewToken(function(e, user) {
+      return cb(e, user);
+    });
+  });
+};
+
 userSchema.methods.serialize = function() {
   return {
     id: this.id.toString(),
