@@ -2,17 +2,13 @@ var expect = require('expect.js');
 
 var authRoutes = require('../../routes/auth').endpoints;
 var proxyquire = require('proxyquire');
+var User = require('../../models/user_model');
 
 
 var auth = proxyquire('../../routes/auth', {
   passport: {
     authenticate: function() {
       return function() {};
-    }
-  },
-  '../models/user_model': {
-    findOrCreate: function(name, cb) {
-      return cb(null, { id: 123, redditName: 'jack' });
     }
   }
 });
@@ -53,19 +49,41 @@ describe('auth routes', function() {
       var req = { session: { redirect: 'f', state: 'b' }, user: { name: 'jack' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(loc).to.eql('f?user_id=123&user_name=jack&token=b');
+          expect(loc).to.match(/f\?user_id=.+&user_name=jack&token=.+/);
           done();
         }
       });
     });
 
-    it('stores the user id in session', function(done) {
+    it('creates a token on the user', function(done) {
       var req = { session: { redirect: 'f', state: 'b' }, user: { name: 'jack' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(req.session.userId).to.eql('123');
-          done();
+          User.findOne({ redditName: 'jack' }, function(e, user) {
+            expect(user.token).to.be.ok();
+            done();
+          });
         }
+      });
+    });
+
+    it('creates a new token every single time the user logs in', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        var oldToken = user.token;
+
+        callRoute('/reddit/success', {
+          user: { name: 'jack' },
+          session: { redirect: 'f' }
+        }, {
+          redirect: function(loc) {
+            User.findOne({ redditName: 'jack' }, function(e, user) {
+              expect(user.token).to.be.ok();
+              expect(user.token).to.not.be(oldToken);
+              done();
+            });
+          }
+        });
+
       });
     });
   });

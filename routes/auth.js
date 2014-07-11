@@ -39,8 +39,9 @@ var authRoutes = {
     method: 'get',
     fn: function(req, res, next) {
       User.findOrCreate(req.user.name, function(e, user) {
-        req.session.userId = user.id;
-        res.redirect(req.session.redirect + '?user_id=' + user.id.toString() + '&user_name=' + user.redditName + '&token=' + req.session.state);
+        user.saveNewToken(function(e, user) {
+          res.redirect(req.session.redirect + '?user_id=' + user.id.toString() + '&user_name=' + user.redditName + '&token=' + user.token);
+        });
       });
     }
   },
