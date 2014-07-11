@@ -42,7 +42,7 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 ## Clusters
 
-#### GET `/?id=CLUSTER_ID&token=USER_TOKEN`
+#### GET `/?clusterId=CLUSTER_ID&token=USER_TOKEN`
 
 Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
 
