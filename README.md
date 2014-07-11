@@ -40,6 +40,25 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 }
 ```
 
+## Clusters
+
+#### GET `/?id=CLUSTER_ID&token=USER_TOKEN`
+
+Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
+
+```json
+{
+"id": "abc1234",
+"name": "foo",
+"createdAt": "Thu Jul 10 2014",
+"owner": "abc65755757",
+"public": "true",
+"subreddits": ["vim", "code"],
+"admins": ["CDE123"],
+"subscribers": ["FEGE142"]
+}
+```
+
 
 
 
