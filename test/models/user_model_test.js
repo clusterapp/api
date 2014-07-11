@@ -17,6 +17,18 @@ describe('User model', function() {
     });
   });
 
+  describe('#saveNewToken', function() {
+    it('persists to the db', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        expect(user.token).to.not.be.ok();
+        user.saveNewToken(function(e, user) {
+          expect(user.token).to.be.ok();
+          done();
+        });
+      });
+    });
+  });
+
   describe('#updateLastActive', function() {
     it('updates the lastActive field to be current time', function() {
       var user = new User({ redditName: 'jack' });
@@ -39,6 +51,35 @@ describe('User model', function() {
       user.updateLastActive(function(e, u) {
         expect(u.lastActive.toString()).to.eql(new Date(time).toString());
         timekeeper.reset();
+        done();
+      });
+    });
+  });
+
+  describe('.tokenIsValid', function() {
+    it('returns true if the token is valid', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        user.saveNewToken(function(e, user) {
+          User.tokenIsValid(user.id, user.token, function(e, res) {
+            expect(res).to.be(true);
+            done();
+          });
+        });
+      });
+    });
+    it('returns false if the token is invalid', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        user.saveNewToken(function(e, user) {
+          User.tokenIsValid(user.id, '12345', function(e, res) {
+            expect(res).to.be(false);
+            done();
+          });
+        });
+      });
+    });
+    it('returns false if the user does not exist', function(done) {
+      User.tokenIsValid('53bfc477672773bdc101fbc1', '12345', function(e, res) {
+        expect(res).to.be(false);
         done();
       });
     });

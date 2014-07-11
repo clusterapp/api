@@ -1,9 +1,11 @@
 var mongoose = require('mongoose');
 var db = require('../database');
+var crypto = require('crypto');
 
 var userSchema = mongoose.Schema({
   redditName: String,
   lastActive: { type: Date, default: Date.now },
+  token: String
 });
 
 userSchema.methods.updateLastActive = function(cb) {
@@ -28,6 +30,19 @@ userSchema.methods.serialize = function() {
     lastActive: this.lastActive.toString(),
     redditName: this.redditName
   }
+};
+
+userSchema.methods.saveNewToken = function(cb) {
+  this.token = crypto.randomBytes(32).toString('hex');
+  this.save(cb);
+};
+
+userSchema.statics.tokenIsValid = function(id, token, cb) {
+  User.findOne({ _id: id }, function(e, user) {
+    if(e) return cb(e);
+    if(!user) return cb(null, false);
+    return cb(null, token == user.token);
+  });
 };
 
 var User = mongoose.model('User', userSchema)
