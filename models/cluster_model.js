@@ -27,6 +27,17 @@ clusterSchema.methods.serialize = function() {
   return resp;
 };
 
+clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
+  Cluster.findById(clusterId, function(e, cluster) {
+    userId = userId.toString();
+    if(e) return cb(false);
+    if(cluster.public) return cb(true);
+    if(cluster.owner && cluster.owner.toString() === userId) return cb(true);
+    if(cluster.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1) return cb(true);
+    return cb(false);
+  });
+};
+
 var Cluster = mongoose.model('Cluster', clusterSchema);
 
 module.exports = Cluster;
