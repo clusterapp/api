@@ -66,6 +66,26 @@ describe('auth routes', function() {
         }
       });
     });
+
+    it('creates a new token every single time the user logs in', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        var oldToken = user.token;
+
+        callRoute('/reddit/success', {
+          user: { name: 'jack' },
+          session: { redirect: 'f' }
+        }, {
+          redirect: function(loc) {
+            User.findOne({ redditName: 'jack' }, function(e, user) {
+              expect(user.token).to.be.ok();
+              expect(user.token).to.not.be(oldToken);
+              done();
+            });
+          }
+        });
+
+      });
+    });
   });
 
   describe('/reddit/failure', function() {
