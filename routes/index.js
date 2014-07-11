@@ -5,4 +5,5 @@ module.exports = function(app) {
 
   app.use('/users', require('./users').router);
   app.use('/auth', require('./auth').router);
+  app.use('/clusters', require('./clusters').router);
 };
