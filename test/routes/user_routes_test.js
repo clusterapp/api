@@ -25,7 +25,7 @@ describe('user routes', function() {
 
         callRoute('/updateLastActive', {
           query: { token: 123, id: user.id } ,
-          session: { state: 123 }
+          session: { state: 123, userId: user.id }
         }, {
           json: function(serialized) {
             expect(serialized.lastActive).to.eql(new Date(time).toString());
@@ -46,10 +46,27 @@ describe('user routes', function() {
         }
       });
     });
+
+    it('errors if the user is not the one in session', function(done) {
+      var user = new User({ redditName: 'jack' });
+      user.save(function(e, user) {
+        callRoute('/updateLastActive', {
+          query: { token: 123, id: user.id },
+          session: { state: 123, userId: 123456999 }
+        }, {
+          json: function(d) {
+            expect(d).to.eql({ error: 'user and token do not match' });
+            done();
+          }
+        });
+      });
+
+    });
+
     it('errors if no user found', function() {
       callRoute('/updateLastActive', {
         query: { token: 123, id: '123' },
-        session: { state: 123 }
+        session: { state: 123, userId: '123' }
       }, {
         json: function(d) {
           expect(d).to.eql({ error: 'no user found' });
@@ -58,21 +75,22 @@ describe('user routes', function() {
     });
   });
 
-  describe('findOrCreate', function() {
-    it('errors if no redditName given', function() {
-      callRoute('/findOrCreate', {}, {
+  describe('/', function() {
+    it('errors if no id given', function() {
+      callRoute('/', {}, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing redditName param' });
+          expect(d).to.eql({ error: 'missing id param' });
         }
       });
     });
-    it('returns a user object from the DB', function(done) {
+
+    it('returns the user if they exist', function(done) {
       var user = new User({ redditName: 'foo' });
       user.save(function(e, user) {
         var id = user.id;
-        callRoute('/findOrCreate', {
-          query: { redditName: 'foo', token: 123 },
-          session: { state: 123 }
+        callRoute('/', {
+          query: { id: id, token: 123 },
+          session: { state: 123, userId: id }
         }, {
           json: function(d) {
             expect(d.id).to.eql(id);
@@ -84,8 +102,8 @@ describe('user routes', function() {
     });
 
     it('errors with invalid or missing hex', function() {
-      callRoute('/findOrCreate', {
-        query: { token: 123, redditName: 'foo'},
+      callRoute('/', {
+        query: { token: 123, id: 'ABC'},
         session: { state: 456 }
       }, {
         json: function(d) {
@@ -94,23 +112,17 @@ describe('user routes', function() {
       });
     });
 
-  });
-
-  it('creates a user if they do not exist', function(done) {
-    callRoute('/findOrCreate', {
-      query: { redditName: 'foo', token: 123 },
-      session: { state: 123 }
-    }, {
-      json: function(d) {
-        expect(d.id).to.be.ok();
-        expect(d.redditName).to.eql('foo');
-
-        User.count(function(e, count) {
-          expect(count).to.be(1);
-          done();
-        });
-      }
+    it('does not allow the req if the user id given doesnt match the user id session', function() {
+      callRoute('/', {
+        query: { id: 456, token: 123 },
+        session: { state: 123, userId: 789 }
+      }, {
+        json: function(d) {
+          expect(d).to.eql({ error: 'user and token do not match' });
+        }
+      });
     });
   });
+
 });
 

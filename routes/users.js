@@ -3,24 +3,33 @@
 var express = require('express');
 var User = require('../models/user_model');
 
+var failOnParams = function(req, res) {
+  var failed = false;
+  if(!req.query || !req.query.id) {
+    res.json({ error: 'missing id param' });
+    failed = true;
+  } else if(!req.query || !req.query.token || req.query.token != req.session.state) {
+    res.json({ error: 'invalid or missing token' });
+    failed = true;
+  } else if(req.query.id != req.session.userId) {
+    res.json({ error: 'user and token do not match' });
+    failed = true;
+  };
+
+  return failed;
+};
+
 var userRoutes = {
-  '/findOrCreate': {
+  '/': {
     method: 'get',
     fn: function(req, res) {
-      if(!req.query || !req.query.redditName) {
-        return res.json({ error: 'missing redditName param' });
-      };
-      if(!req.query || !req.query.token || req.query.token != req.session.state) {
-        return res.json({ error: 'invalid or missing token' });
-      };
-      var redditName = req.query.redditName;
-      User.findOne({ redditName: redditName }, function(e, user) {
+      if(failOnParams(req, res)) return;
+
+      User.findOne({ _id: req.query.id }, function(e, user) {
         if(user) {
           res.json(user.serialize());
         } else {
-          new User({ redditName: redditName }).save(function(e, user) {
-            res.json(user.serialize());
-          });
+          res.json({ error: 'no user found' });
         }
       });
     }
@@ -28,17 +37,17 @@ var userRoutes = {
   '/updateLastActive': {
     method: 'post',
     fn: function(req, res) {
-      if(!req.query || !req.query.id) {
-        return res.json({ error: 'missing id param' });
-      }
-      if(!req.query || !req.query.token || req.query.token != req.session.state) {
-        return res.json({ error: 'invalid or missing token' });
-      }
+      if(failOnParams(req, res)) return;
+
       User.findById(req.query.id, function(e, user) {
         if(user) {
-          user.updateLastActive(function(e, u) {
-            res.json(u.serialize());
-          });
+          if(user.id == req.session.userId) {
+            user.updateLastActive(function(e, u) {
+              res.json(u.serialize());
+            });
+          } else {
+            res.json({ error: 'user and token do not match' });
+          }
         } else {
           res.json({ error: 'no user found' });
         }

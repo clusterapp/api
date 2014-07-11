@@ -44,6 +44,29 @@ describe('User model', function() {
     });
   });
 
+  describe('.findOrCreate', function() {
+    it('creates a user if they do not exist', function(done) {
+      User.findOrCreate('jack', function(e, user) {
+        User.count(function(e, c) {
+          expect(c).to.eql(1);
+          done();
+        });
+      });
+    });
+
+    it('finds a user if they exist', function(done) {
+      var jack = new User({ redditName: 'jack' });
+      jack.save(function(e, user) {
+        User.findOrCreate('jack', function(e, user) {
+          expect(jack.id).to.eql(user.id);
+          User.count(function(e, c) {
+            expect(c).to.eql(1);
+            done();
+          });
+        });
+      });;
+    });
+  });
   describe('#serialize', function() {
     it('only contains fields we want exposed', function() {
       var user = new User({ redditName: 'jack' }).serialize();
