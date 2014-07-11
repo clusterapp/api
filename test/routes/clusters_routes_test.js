@@ -24,7 +24,7 @@ describe('cluster routes', function() {
       });
     });
 
-    it.only('errors if the token is invalid', function(done) {
+    it('errors if the token is invalid', function(done) {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {

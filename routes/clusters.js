@@ -1,10 +1,10 @@
 // all these routes are nested under /clusters
 
 var express = require('express');
-var async = require('async');
 var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
+var validateParamsExist = require('./param_validator');
 
 ERRORS.NO_CLUSTER_FOUND = function() {
   return { error: 'no cluster found' }
@@ -14,41 +14,6 @@ ERRORS.USER_PERMISSIONS_WRONG = function() {
   return { error: 'user does not have permission to view cluster' }
 };
 
-var validateParamsExist = function(params, req, res, cb) {
-  if(!req.query) {
-    res.json({ errors: ['no parameters supplied'] });
-    return cb(false);
-  } else {
-    var errors = [];
-    async.each(params, function(p, callback) {
-      if(!req.query[p]) {
-        errors.push('parameter ' + p + ' is required');
-        callback();
-      } else {
-        if(p === 'token' && req.query.token) {
-          if(params.indexOf('userId') > -1 && req.query.userId) {
-            User.findOne({ token: req.query.token, id: req.query.userId }, function(e, user) {
-              if(e || !user) errors.push('parameter: token is not valid');
-              callback();
-            });
-          } else {
-            User.findOne({ token: req.query.token }, function(e, user) {
-              if(e || !user) errors.push('parameter: token is not valid');
-              callback();
-            });
-          }
-        } else { callback(); }
-      }
-    }, function(err) {
-      if(errors.length > 0) {
-        res.json({ errors: errors });
-        return cb(false);
-      } else {
-        return cb(true);
-      }
-    });
-  };
-}
 
 var clusterRoutes = {
   '/': {
