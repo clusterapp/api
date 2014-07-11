@@ -13,7 +13,15 @@ module.exports = function(app) {
     done(null, obj);
   });
 
-  var authCodes = require('./keys.json');
+  if(process.env.NODE_ENV && process.env.NODE_ENV == 'test') {
+    var authCodes = {};
+    authCodes.test = {
+      redditKey: 'baZ1VtnPyWCQNA',
+      redditSecret: 'JIqQAUjIlJf1cGKoFOsTlh-fWHA'
+    }
+  } else {
+    var authCodes = require('./keys.json');
+  }
 
   var env = process.env.NODE_ENV || 'development';
   var callbackUrl = (env == 'development' || env == 'test' ?
