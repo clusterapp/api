@@ -24,7 +24,7 @@ describe('Cluster model', function() {
     });
   });
 
-  describe('#userHasPermission', function() {
+  describe('.userHasPermission', function() {
     it('gives permission if cluster is public', function(done) {
       new Cluster({ public: true }).save(function(e, cluster) {
         Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
