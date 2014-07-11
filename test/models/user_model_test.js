@@ -29,6 +29,14 @@ describe('User model', function() {
     });
   });
 
+  describe('.createWithToken', function() {
+    it('creates a new user with a token', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        expect(user.token).to.be.ok();
+        done();
+      });
+    });
+  });
   describe('#updateLastActive', function() {
     it('updates the lastActive field to be current time', function() {
       var user = new User({ redditName: 'jack' });
