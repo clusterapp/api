@@ -39,6 +39,36 @@ describe('cluster routes', function() {
       });
     });
 
+    it('does not return a private cluster if userId is not owner or admin', function(done) {
+      User.createWithToken({ redditName: 'Jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
+          callRoute('/', {
+            query: { id: cluster.id, token: user.token, userId: '53c00d6d6ccaa6cb091bec4f' }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({ error: 'user does not have permission to view cluster' });
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('returns a private cluster if userId matches', function(done) {
+      User.createWithToken({ redditName: 'Jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
+          callRoute('/', {
+            query: { id: cluster.id, token: user.token, userId: user.id }
+          }, {
+            json: function(d) {
+              expect(d.name).to.eql('foo');
+              done();
+            }
+          });
+        });
+      });
+    });
+
     it('returns the cluster', function(done) {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {

@@ -59,6 +59,8 @@ Given a cluster id, and a token of the active user, will return a serialized obj
 }
 ```
 
+If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
+
 
 
 

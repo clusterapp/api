@@ -9,6 +9,10 @@ ERRORS.NO_CLUSTER_FOUND = function() {
   return { error: 'no cluster found' }
 };
 
+ERRORS.USER_PERMISSIONS_WRONG = function() {
+  return { error: 'user does not have permission to view cluster' }
+};
+
 var validateParams = function(req, res, cb) {
   if(!req.query || !req.query.id) {
     res.json(ERRORS.MISSING_PARAM('id'));
@@ -36,7 +40,11 @@ var clusterRoutes = {
         if(!valid) return;
         Cluster.findById(req.query.id, function(e, cluster) {
           if(cluster) {
-            res.json(cluster.serialize());
+            if(cluster.public || cluster.owner == req.query.userId || cluster.admins.indexOf(req.query.userId) > -1) {
+              res.json(cluster.serialize());
+            } else {
+              res.json(ERRORS.USER_PERMISSIONS_WRONG());
+            }
           } else {
             res.json(ERRORS.NO_CLUSTER_FOUND());
           }
