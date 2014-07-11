@@ -30,7 +30,7 @@ describe('auth routes', function() {
     it('errors if not given a query parameter', function() {
       callRoute('/reddit', {}, {
         json: function(data) {
-          expect(data).to.eql({ error: 'No redirect param given' });
+          expect(data).to.eql({ error: 'missing parameter: redirect' });
         }
       });
     });

@@ -42,7 +42,7 @@ describe('user routes', function() {
         session: { state: 123 }
       }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing id param' });
+          expect(d).to.eql({ error: 'missing parameter: id' });
         }
       });
     });
@@ -55,7 +55,7 @@ describe('user routes', function() {
           session: { state: 123, userId: 123456999 }
         }, {
           json: function(d) {
-            expect(d).to.eql({ error: 'user and token do not match' });
+            expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
             done();
           }
         });
@@ -79,7 +79,7 @@ describe('user routes', function() {
     it('errors if no id given', function() {
       callRoute('/', {}, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing id param' });
+          expect(d).to.eql({ error: 'missing parameter: id' });
         }
       });
     });
@@ -118,7 +118,7 @@ describe('user routes', function() {
         session: { state: 123, userId: 789 }
       }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'user and token do not match' });
+          expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
         }
       });
     });

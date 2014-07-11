@@ -5,13 +5,14 @@ var crypto = require('crypto');
 var passport = require('passport');
 var _ = require('underscore');
 var User = require('../models/user_model');
+var ERRORS = require('./error_messages');
 
 var authRoutes = {
   '/reddit': {
     method: 'get',
     fn: function(req, res, next) {
       if(!req.query || !req.query.redirect) {
-        return res.json({ error: 'No redirect param given' });
+        return res.json(ERRORS.MISSING_PARAM('redirect'));
       };
 
       req.session.redirect = req.query.redirect;
