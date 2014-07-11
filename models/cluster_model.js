@@ -29,11 +29,12 @@ clusterSchema.methods.serialize = function() {
 
 clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
   Cluster.findById(clusterId, function(e, cluster) {
-    userId = userId.toString();
     if(e) return cb(false);
-    if(cluster.public) return cb(true);
-    if(cluster.owner && cluster.owner.toString() === userId) return cb(true);
-    if(cluster.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1) return cb(true);
+    if(cluster.public) return cb(true, cluster);
+    if(!userId) return cb(false);
+    userId = userId.toString();
+    if(cluster.owner && cluster.owner.toString() === userId) return cb(true, cluster);
+    if(cluster.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1) return cb(true, cluster);
     return cb(false);
   });
 };

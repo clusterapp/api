@@ -46,6 +46,15 @@ describe('Cluster model', function() {
       });
     });
 
+    it('deals with no user id', function(done) {
+      new Cluster({ public: false }).save(function(e, cluster) {
+        Cluster.userHasPermission(undefined, cluster.id, function(res) {
+          expect(res).to.be(false);
+          done();
+        });
+      });
+    });
+
     it('gives perms when private if user is admin', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
         new Cluster({ name: 'foo', admins: [user], public: false }).save(function(e, cluster) {
