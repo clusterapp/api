@@ -3,16 +3,18 @@
 var express = require('express');
 var User = require('../models/user_model');
 
+var ERRORS = require('./error_messages');
+
 var failOnParams = function(req, res) {
   var failed = false;
   if(!req.query || !req.query.id) {
-    res.json({ error: 'missing id param' });
+    res.json(ERRORS.MISSING_PARAM('id'));
     failed = true;
   } else if(!req.query || !req.query.token || req.query.token != req.session.state) {
-    res.json({ error: 'invalid or missing token' });
+    res.json(ERRORS.INVALID_TOKEN());
     failed = true;
   } else if(req.query.id != req.session.userId) {
-    res.json({ error: 'user and token do not match' });
+    res.json(ERRORS.INVALID_PARAM('id'));
     failed = true;
   };
 
@@ -29,7 +31,7 @@ var userRoutes = {
         if(user) {
           res.json(user.serialize());
         } else {
-          res.json({ error: 'no user found' });
+          res.json(ERRORS.NO_USER_FOUND());
         }
       });
     }
@@ -41,15 +43,11 @@ var userRoutes = {
 
       User.findById(req.query.id, function(e, user) {
         if(user) {
-          if(user.id == req.session.userId) {
-            user.updateLastActive(function(e, u) {
-              res.json(u.serialize());
-            });
-          } else {
-            res.json({ error: 'user and token do not match' });
-          }
+          user.updateLastActive(function(e, u) {
+            res.json(u.serialize());
+          });
         } else {
-          res.json({ error: 'no user found' });
+          res.json(ERRORS.NO_USER_FOUND());
         }
       });
     }
