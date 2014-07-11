@@ -16,22 +16,22 @@ var callRoute = function(route, req, res) {
 describe('cluster routes', function() {
   describe('/', function() {
     it('errors if no id given', function(done) {
-      callRoute('/', {}, {
+      callRoute('/', { query: {} }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing parameter: id' });
+          expect(d).to.eql({ errors: [ 'parameter id is required', 'parameter token is required' ] });
           done();
         }
       });
     });
 
-    it('errors if the token is invalid', function(done) {
+    it.only('errors if the token is invalid', function(done) {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
             query: { id: cluster.id, token: '12345' }
           }, {
             json: function(d) {
-              expect(d).to.eql({ error: 'parameter: token is not valid or does not match' });
+              expect(d).to.eql({ errors: ['parameter: token is not valid'] });
               done();
             }
           });

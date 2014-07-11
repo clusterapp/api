@@ -48,19 +48,21 @@ Given a cluster id, and a token of the active user, will return a serialized obj
 
 ```json
 {
-"id": "abc1234",
-"name": "foo",
-"createdAt": "Thu Jul 10 2014",
-"owner": "abc65755757",
-"public": "true",
-"subreddits": ["vim", "code"],
-"admins": ["CDE123"],
-"subscribers": ["FEGE142"]
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
 }
 ```
 
 If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
 
+
+#### POST `/create?userId=USER_ID&token=USER_TOKEN`
 
 
 
