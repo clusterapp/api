@@ -20,9 +20,9 @@ var clusterRoutes = {
     method: 'get',
     fn: function(req, res) {
       // todo: this behaviour will change if cluster is private
-      validateParamsExist(['id', 'token'], req, res, function(valid) {
+      validateParamsExist(['clusterId', 'token'], req, res, function(valid) {
         if(!valid) return;
-        Cluster.userHasPermission(req.query.userId, req.query.id, function(hasPermission, cluster) {
+        Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
         });
       });

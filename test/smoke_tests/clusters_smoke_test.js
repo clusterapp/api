@@ -13,7 +13,7 @@ describe('/', function() {
   it('returns the cluster', function(done) {
     User.createWithToken({ redditName: 'jack' }, function(e, user) {
       new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
-        $.get(URL_BASE, { id: cluster.id, token: user.token }, function(e, json) {
+        $.get(URL_BASE, { clusterId: cluster.id, token: user.token }, function(e, json) {
           expect(json).to.eql({
             id: cluster.id,
             name: cluster.name,

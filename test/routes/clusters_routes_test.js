@@ -18,7 +18,7 @@ describe('cluster routes', function() {
     it('errors if no id given', function(done) {
       callRoute('/', { query: {} }, {
         json: function(d) {
-          expect(d).to.eql({ errors: [ 'parameter id is required', 'parameter token is required' ] });
+          expect(d).to.eql({ errors: [ 'parameter clusterId is required', 'parameter token is required' ] });
           done();
         }
       });
@@ -28,7 +28,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: '12345' }
+            query: { clusterId: cluster.id, token: '12345' }
           }, {
             json: function(d) {
               expect(d).to.eql({ errors: ['parameter: token is not valid'] });
@@ -43,7 +43,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: user.token, userId: '53c00d6d6ccaa6cb091bec4f' }
+            query: { clusterId: cluster.id, token: user.token, userId: '53c00d6d6ccaa6cb091bec4f' }
           }, {
             json: function(d) {
               expect(d).to.eql({ error: 'no cluster found' });
@@ -58,7 +58,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: user.token, userId: user.id }
+            query: { clusterId: cluster.id, token: user.token, userId: user.id }
           }, {
             json: function(d) {
               expect(d.name).to.eql('foo');
@@ -73,7 +73,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: user.token }
+            query: { clusterId: cluster.id, token: user.token }
           }, {
             json: function(d) {
               expect(d.name).to.eql('foo');
