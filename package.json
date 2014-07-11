@@ -21,13 +21,15 @@
     "passport-reddit": "^0.2.4",
     "reddit-wrapper": "0.0.2",
     "static-favicon": "~1.0.0",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "zombie": "^2.0.0-alpha31"
   },
   "devDependencies": {
     "chokidar": "^0.8.2",
     "expect.js": "^0.3.1",
     "mocha": "^1.20.1",
     "proxyquire": "^1.0.1",
+    "request": "^2.37.0",
     "supertest": "^0.13.0",
     "timekeeper": "0.0.4"
   }
