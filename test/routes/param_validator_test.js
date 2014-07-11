@@ -3,7 +3,7 @@ var expect = require('expect.js');
 var validateParamsExist = require('../../routes/param_validator');
 var User = require('../../models/user_model');
 
-describe.only('param validator', function() {
+describe('param validator', function() {
   it('errors if no params at all given', function(done) {
     validateParamsExist([], {}, {
       json: function(d) {

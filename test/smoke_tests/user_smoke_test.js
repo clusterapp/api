@@ -13,7 +13,7 @@ var $ = require('./helpers');
 describe('/', function() {
   it('gets the current user and returns it', function(done) {
     User.createWithToken({ redditName: 'jack' }, function(e, user) {
-      $.get(URL_BASE, { id: user.id, token: user.token }, function(e, json) {
+      $.get(URL_BASE, { userId: user.id, token: user.token }, function(e, json) {
         expect(json).to.eql({
           id: user.id,
           lastActive: user.lastActive.toString(),
@@ -30,7 +30,7 @@ describe('/updateLastActive', function() {
     User.createWithToken({ redditName: 'jack' }, function(e, user) {
       var time = new Date(1893448800000); // January 1, 2030 00:00:00
       timekeeper.freeze(time); // Travel to that date.
-      $.post(URL_BASE + '/updateLastActive', { id: user.id, token: user.token }, '', function(e, json) {
+      $.post(URL_BASE + '/updateLastActive', { userId: user.id, token: user.token }, '', function(e, json) {
         expect(json).to.eql({
           id: user.id,
           lastActive: new Date(time).toString(),

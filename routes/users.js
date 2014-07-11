@@ -5,6 +5,8 @@ var User = require('../models/user_model');
 
 var ERRORS = require('./error_messages');
 
+var validateParamsExist = require('./param_validator');
+
 var validateParams = function(req, res, cb) {
   if(!req.query || !req.query.id) {
     res.json(ERRORS.MISSING_PARAM('id'));
@@ -29,9 +31,9 @@ var userRoutes = {
   '/': {
     method: 'get',
     fn: function(req, res) {
-      validateParams(req, res, function(valid) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
-        User.findOne({ _id: req.query.id }, function(e, user) {
+        User.findOne({ _id: req.query.userId }, function(e, user) {
           if(user) {
             res.json(user.serialize());
           } else {
@@ -44,9 +46,9 @@ var userRoutes = {
   '/updateLastActive': {
     method: 'post',
     fn: function(req, res) {
-      validateParams(req, res, function(valid) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
-        User.findById(req.query.id, function(e, user) {
+        User.findById(req.query.userId, function(e, user) {
           if(user) {
             user.updateLastActive(function(e, u) {
               res.json(u.serialize());

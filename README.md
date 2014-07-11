@@ -16,7 +16,7 @@ The redirect will include a query string: `?user_id=USER_ID&user_name=USER_NAME&
 
 ## User
 
-####  GET `/users/?token=TOKEN&id=USER_ID`
+####  GET `/users/?token=TOKEN&userId=USER_ID`
 
 Given the user's reddit id and a token (given back to you in the authentication process), this will return you back an object representing the user:
 
@@ -28,7 +28,7 @@ Given the user's reddit id and a token (given back to you in the authentication 
 }
 ```
 
-#### POST `/users/updateLastActive?token=TOKEN&id=USER_ID`
+#### POST `/users/updateLastActive?token=TOKEN&userId=USER_ID`
 
 Updates the `lastActive` field on the user and returns the serialized user object.
 
