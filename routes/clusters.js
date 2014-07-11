@@ -18,8 +18,11 @@ var validateParams = function(req, res, cb) {
     return cb(false);
   } else {
     User.findOne({ token: req.query.token }, function(e, user) {
-      if(e) { return cb(false); }
-      return cb(!!user);
+      if(e || !user) {
+        res.json(ERRORS.INVALID_PARAM('token'));
+        return cb(false);
+      }
+      return cb(true);
     });
   };
 };
