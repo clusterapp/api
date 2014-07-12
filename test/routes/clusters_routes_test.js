@@ -89,24 +89,40 @@ describe('cluster routes', function() {
   });
 
   describe('/listing', function() {
-    // it('hits the end points for each subreddit', function(done) {
-    //   var vimMock = mock('/r/vim/hot.json');
-    //   var angularjsMock = mock('/r/angularjs/hot.json');
-    //   var wtfMock = mock('/r/wtf/hot.json');
-    //   createUserAndCluster({
-    //     user: { redditName: 'jack' },
-    //     cluster: { name: 'foo', subreddits: ['vim', 'angularjs', 'wtf'] }
-    //   }, function(user, cluster) {
-    //     callRoute('/listing', {
-    //       query: { userId: user.id, token: user.token, clusterId: cluster.id }
-    //     }, {
-    //       json: function(d) {
-    //         expectMocksToBeCalled(vimMock, angularjsMock, wtfMock)
-    //         done();
-    //       }
-    //     });
-    //   });
-    // });
+    it('returns the data for a valid request', function(done) {
+      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: { userId: user.id, token: user.token, clusterId: cluster.id }
+        }, {
+          json: function(d) {
+            expect(d.sorted.length).to.be(10);
+            done();
+          }
+        });
+      });
+    });
+
+    it('says no cluster found if user does not have permissions', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, jack) {
+        new User({ redditName: 'ollie' }).save(function(e, ollie) {
+          new Cluster({ name: 'foo', owner: ollie, public: false }).save(function(e, cluster) {
+            callRoute('/listing', {
+              query: { userId: jack.id, token: jack.token, clusterId: cluster.id }
+            }, {
+              json: function(d) {
+                expect(d).to.eql({ errors: [ 'no cluster found' ] });
+                done();
+              }
+            });
+          });
+        });
+      });
+    });
   });
 
   var expectMocksToBeCalled = function() {
