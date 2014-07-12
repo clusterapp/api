@@ -5,6 +5,7 @@ var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
 var validateParamsExist = require('./param_validator');
+var Listing = require('./listing');
 
 ERRORS.NO_CLUSTER_FOUND = function() {
   return { errors: [ 'no cluster found' ] }
@@ -14,11 +15,27 @@ var clusterRoutes = {
   '/': {
     method: 'get',
     fn: function(req, res) {
-      // todo: this behaviour will change if cluster is private
       validateParamsExist(['clusterId', 'token'], req, res, function(valid) {
         if(!valid) return;
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
+        });
+      });
+    }
+  },
+  '/listing': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
+          if(hasPermission) {
+            new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
+              res.json(listing);
+            });
+          } else {
+            res.json(ERRORS.NO_CLUSTER_FOUND());
+          }
         });
       });
     }

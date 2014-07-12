@@ -26,9 +26,10 @@
   "devDependencies": {
     "expect.js": "0.3.1",
     "mocha": "1.20.1",
+    "nock": "^0.42.1",
     "proxyquire": "1.0.1",
-    "supertest": "0.13.0",
     "request": "2.37.0",
+    "supertest": "0.13.0",
     "timekeeper": "0.0.4"
   }
 }
