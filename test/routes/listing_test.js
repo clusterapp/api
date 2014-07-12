@@ -39,11 +39,23 @@ describe('listings', function() {
     });
   });
 
-  describe('sorting the subreddit data', function() {
-    it('returns the raw json for each subreddit', function(done) {
+  describe('processing the subreddit data', function() {
+    var listing;
+    beforeEach(function() {
       mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
       mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
-      var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+      listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+    });
+
+    it('returns all the after parameters', function(done) {
+      listing.get({}, function(e, data) {
+        expect(data.after.vim).to.eql("t3_2a7cvd");
+        expect(data.after.angularjs).to.eql("t3_2a4n4l");
+        done();
+      });
+    });
+
+    it('returns the raw json for each subreddit', function(done) {
       listing.get({}, function(e, data) {
         expect(data.vim.data.children[0].data.title)
           .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
@@ -53,10 +65,7 @@ describe('listings', function() {
       });
     });
 
-    it.only('merges them together based on the scores of each', function(done) {
-      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
-      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
-      var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+    it('merges them together based on the scores of each', function(done) {
       listing.get({}, function(e, data) {
         var result = data.sorted;
         expect(result[0].title).to.eql("Angular\u2019s dependency injection annotation process");

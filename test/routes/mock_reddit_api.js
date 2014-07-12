@@ -5,7 +5,7 @@ var fs = require('fs');
 var mock = function(subUrl, response) {
   return nock('http://www.reddit.com')
     .get(subUrl)
-    .reply(200, response || { data: true });
+    .reply(200, response || { data: { children: [] } });
 }
 
 mock.withFile = function(subUrl, file) {
