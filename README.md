@@ -42,7 +42,7 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 ## Clusters
 
-#### GET `/?clusterId=CLUSTER_ID&token=USER_TOKEN`
+#### GET `/clusters/?clusterId=CLUSTER_ID&token=USER_TOKEN`
 
 Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
 
@@ -62,7 +62,32 @@ Given a cluster id, and a token of the active user, will return a serialized obj
 If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
 
 
-#### POST `/create?userId=USER_ID&token=USER_TOKEN`
+#### POST `/clusters/create?userId=USER_ID&token=USER_TOKEN`
+
+Creates a cluster. Should be passed a JSON string which is an object with the following properties:
+
+```json
+{
+  "owner": USER_ID,
+  "name": CLUSTER_NAME,
+  "subreddits": [ CLUSTER_SUBREDDIT1, CLUSTER_SUBREDDIT2 ],
+  "public": false
+}
+```
+
+#### GET `/clusters/listing?userId=USER_ID&token=USER_TOKEN&clusterId=CLUSTER_ID`
+
+Returns a listing for the given cluster ID, as long as the user is able to view the cluster. The `sorted` key will contain the items in the cluster in the sorted order.
+
+```json
+{
+  "sorted": [ { title: "...", url: "..." }, ... ]
+  ...other metadata
+}
+```
+
+
+
 
 
 
