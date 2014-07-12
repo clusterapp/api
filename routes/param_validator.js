@@ -16,37 +16,46 @@ var ensureTokenExists = function(token, errors, done) {
   });
 };
 
+var noParamsPassed = function(req, res) {
+  if(req.query) {
+    return false;
+  } else {
+    res.json({ errors: ['no parameters supplied'] });
+    return true;
+  }
+};
+
+var checkTokenAndIds = function(req, errors, cb) {
+  var token = req.query.token;
+  var userId = req.query.userId;
+  if(token) {
+    if(userId) {
+      matchTokenToUser(token, userId, errors, cb);
+    } else {
+      ensureTokenExists(token, errors, cb);
+    }
+  } else {
+    cb();
+  }
+};
+
 //TODO: this needs some love and attention
 var validateParamsExist = function(params, req, res, cb) {
-  if(!req.query) {
-    res.json({ errors: ['no parameters supplied'] });
-    return cb(false);
-  } else {
-    var errors = [];
-    async.each(params, function(p, callback) {
-      if(!req.query[p]) {
-        errors.push('parameter ' + p + ' is required');
-        callback();
-      } else {
-        if(p === 'token' && req.query.token) {
-          if(params.indexOf('userId') > -1 && req.query.userId) {
-            matchTokenToUser(req.query.token, req.query.userId, errors, callback);
-          } else {
-            ensureTokenExists(req.query.token, errors, callback);
-          }
-        } else {
-          callback();
-        }
-      }
-    }, function(err) {
-      if(errors.length > 0) {
-        res.json({ errors: errors });
-        return cb(false);
-      } else {
-        return cb(true);
-      }
-    });
-  };
+  if(noParamsPassed(req, res)) return cb(false);
+
+  var errors = [];
+  params.forEach(function(p) {
+    if(!req.query[p]) errors.push('parameter ' + p + ' is required');
+  });
+
+  checkTokenAndIds(req, errors, function() {
+    if(errors.length > 0) {
+      res.json({ errors: errors });
+      return cb(false);
+    } else {
+      return cb(true);
+    }
+  });
 }
 
 module.exports = validateParamsExist;

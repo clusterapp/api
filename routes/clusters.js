@@ -7,13 +7,8 @@ var Cluster = require('../models/cluster_model');
 var validateParamsExist = require('./param_validator');
 
 ERRORS.NO_CLUSTER_FOUND = function() {
-  return { error: 'no cluster found' }
+  return { errors: [ 'no cluster found' ] }
 };
-
-ERRORS.USER_PERMISSIONS_WRONG = function() {
-  return { error: 'user does not have permission to view cluster' }
-};
-
 
 var clusterRoutes = {
   '/': {
