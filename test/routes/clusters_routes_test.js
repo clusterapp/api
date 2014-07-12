@@ -8,6 +8,7 @@ var Cluster = require('../../models/cluster_model');
 require('../test_db_config');
 
 var timekeeper = require('timekeeper');
+var mock = require('./mock_reddit_api.js');
 
 var callRoute = function(route, req, res) {
   clusterRoutes[route].fn(req, res);
@@ -86,4 +87,89 @@ describe('cluster routes', function() {
       });
     });
   });
+
+  describe.only('/listing', function() {
+    it('uses the after parameters if passed', function(done) {
+      var vimMock = mock('/r/vim/hot.json?after=foo');
+      var angularjsMock = mock('/r/angularjs/hot.json?after=bar');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: {
+            userId: user.id,
+            token: user.token,
+            clusterId: cluster.id,
+            after: { vim: 'foo', angularjs: 'bar' }
+          }
+        }, {
+          json: function(d) {
+            expectMocksToBeCalled(vimMock, angularjsMock);
+            done();
+          }
+        });
+      });
+    });
+
+    it('only uses after params if they are there', function(done) {
+      var vimMock = mock('/r/vim/hot.json?after=foo');
+      var angularjsMock = mock('/r/angularjs/hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: {
+            userId: user.id,
+            token: user.token,
+            clusterId: cluster.id,
+            after: { vim: 'foo' }
+          }
+        }, {
+          json: function(d) {
+            expectMocksToBeCalled(vimMock, angularjsMock);
+            done();
+          }
+        });
+      });
+    });
+
+
+    it('hits the end points for each subreddit', function(done) {
+      var vimMock = mock('/r/vim/hot.json');
+      var angularjsMock = mock('/r/angularjs/hot.json');
+      var wtfMock = mock('/r/wtf/hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs', 'wtf'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: { userId: user.id, token: user.token, clusterId: cluster.id }
+        }, {
+          json: function(d) {
+            expectMocksToBeCalled(vimMock, angularjsMock, wtfMock)
+            done();
+          }
+        });
+      });
+    });
+  });
+
+  var expectMocksToBeCalled = function() {
+    var args = Array.prototype.slice.call(arguments);
+    args.forEach(function(m) {
+      expect(m.isDone()).to.be(true);
+    });
+  }
+
+  var createUserAndCluster = function(opts, cb) {
+    User.createWithToken(opts.user, function(e, user) {
+      opts.cluster.owner = user;
+      new Cluster(opts.cluster).save(function(e, cluster) {
+        cb(user, cluster);
+      });
+    });
+  };
+
 });
