@@ -39,7 +39,6 @@ var checkTokenAndIds = function(req, errors, cb) {
   }
 };
 
-//TODO: this needs some love and attention
 var validateParamsExist = function(params, req, res, cb) {
   if(noParamsPassed(req, res)) return cb(false);
 
