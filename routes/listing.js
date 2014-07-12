@@ -9,7 +9,7 @@ var Listing = function(cluster) {
 };
 
 Listing.prototype.get = function(opts, cb) {
-  var results = [];
+  var results = {};
   async.each(this.cluster.subreddits, function(item, done) {
     var listingOpts = {
       subReddit: item
@@ -18,10 +18,11 @@ Listing.prototype.get = function(opts, cb) {
       listingOpts.after = opts.after[item];
     }
     this.wrap.listing(listingOpts, function(e, resp, body) {
+      results[item] = body;
       done();
     });
   }.bind(this), function(err) {
-    cb(null, { foo: 2 });
+    cb(null, results);
   });
 };
 
