@@ -23,7 +23,7 @@ describe('user routes', function() {
         timekeeper.freeze(time); // Travel to that date.
 
         callRoute('/updateLastActive', {
-          query: { token: user.token, id: user.id }
+          query: { token: user.token, userId: user.id }
         }, {
           json: function(serialized) {
             expect(serialized.lastActive).to.eql(new Date(time).toString());
@@ -34,25 +34,16 @@ describe('user routes', function() {
       });
     });
 
-    it('errors if no id given', function(done) {
-      callRoute('/updateLastActive', {
-        query: { token: 123 }
-      }, {
-        json: function(d) {
-          expect(d).to.eql({ error: 'missing parameter: id' });
-          done();
-        }
-      });
-    });
-
     it('errors if the user does not match the token', function(done) {
       var user = new User({ redditName: 'jack' });
       user.save(function(e, user) {
         callRoute('/updateLastActive', {
-          query: { token: 123, id: user.id },
+          query: { token: 123, userId: user.id },
         }, {
           json: function(d) {
-            expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
+            expect(d).to.eql({ errors: [
+              'parameter: token is not valid'
+            ]});
             done();
           }
         });
@@ -61,10 +52,10 @@ describe('user routes', function() {
 
     it('errors if no user found', function(done) {
       callRoute('/updateLastActive', {
-        query: { token: 123, id: '123' },
+        query: { token: 123, userId: '123' },
       }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
+          expect(d).to.eql({ errors: ['parameter: token is not valid'] });
           done();
         }
       });
@@ -73,9 +64,9 @@ describe('user routes', function() {
 
   describe('/', function() {
     it('errors if no id given', function(done) {
-      callRoute('/', {}, {
+      callRoute('/', { query: {} }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing parameter: id' });
+          expect(d).to.eql({ errors: ['parameter userId is required', 'parameter token is required'] });
           done();
         }
       });
@@ -85,7 +76,7 @@ describe('user routes', function() {
       User.createWithToken({ redditName: 'foo' }, function(e, user) {
         var id = user.id;
         callRoute('/', {
-          query: { id: id, token: user.token }
+          query: { userId: id, token: user.token }
         }, {
           json: function(d) {
             expect(d.id).to.eql(id);
@@ -101,23 +92,15 @@ describe('user routes', function() {
         query: { token: 123, id: 'ABC'}
       }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
+          expect(d).to.eql({ errors: [
+            'parameter userId is required',
+            'parameter: token is not valid'
+          ]});
           done();
         }
       });
     });
 
-    it('does not allow the req if the user id given doesnt match the user id session', function(done) {
-      callRoute('/', {
-        query: { id: 456, token: 123 },
-        session: { state: 123, userId: 789 }
-      }, {
-        json: function(d) {
-          expect(d).to.eql({ error: 'parameter: id is not valid or does not match' });
-          done();
-        }
-      });
-    });
   });
 
 });

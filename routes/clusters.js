@@ -4,31 +4,10 @@ var express = require('express');
 var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
+var validateParamsExist = require('./param_validator');
 
 ERRORS.NO_CLUSTER_FOUND = function() {
-  return { error: 'no cluster found' }
-};
-
-ERRORS.USER_PERMISSIONS_WRONG = function() {
-  return { error: 'user does not have permission to view cluster' }
-};
-
-var validateParams = function(req, res, cb) {
-  if(!req.query || !req.query.id) {
-    res.json(ERRORS.MISSING_PARAM('id'));
-    return cb(false);
-  } else if(!req.query || !req.query.token) {
-    res.json(ERRORS.MISSING_PARAM('token'));
-    return cb(false);
-  } else {
-    User.findOne({ token: req.query.token }, function(e, user) {
-      if(e || !user) {
-        res.json(ERRORS.INVALID_PARAM('token'));
-        return cb(false);
-      }
-      return cb(true);
-    });
-  };
+  return { errors: [ 'no cluster found' ] }
 };
 
 var clusterRoutes = {
@@ -36,10 +15,24 @@ var clusterRoutes = {
     method: 'get',
     fn: function(req, res) {
       // todo: this behaviour will change if cluster is private
-      validateParams(req, res, function(valid) {
+      validateParamsExist(['clusterId', 'token'], req, res, function(valid) {
         if(!valid) return;
-        Cluster.userHasPermission(req.query.userId, req.query.id, function(hasPermission, cluster) {
+        Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
+        });
+      });
+    }
+  },
+  '/create': {
+    method: 'post',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        new Cluster(req.body).save(function(e, cluster) {
+          if(e) {
+            return res.json({ error: e.message });
+          }
+          res.json(cluster.serialize());
         });
       });
     }

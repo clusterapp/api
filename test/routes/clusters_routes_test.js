@@ -16,9 +16,9 @@ var callRoute = function(route, req, res) {
 describe('cluster routes', function() {
   describe('/', function() {
     it('errors if no id given', function(done) {
-      callRoute('/', {}, {
+      callRoute('/', { query: {} }, {
         json: function(d) {
-          expect(d).to.eql({ error: 'missing parameter: id' });
+          expect(d).to.eql({ errors: [ 'parameter clusterId is required', 'parameter token is required' ] });
           done();
         }
       });
@@ -28,10 +28,10 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: '12345' }
+            query: { clusterId: cluster.id, token: '12345' }
           }, {
             json: function(d) {
-              expect(d).to.eql({ error: 'parameter: token is not valid or does not match' });
+              expect(d).to.eql({ errors: ['parameter: token is not valid'] });
               done();
             }
           });
@@ -40,15 +40,17 @@ describe('cluster routes', function() {
     });
 
     it('does not return a private cluster if userId is not owner or admin', function(done) {
-      User.createWithToken({ redditName: 'Jack' }, function(e, user) {
-        new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
-          callRoute('/', {
-            query: { id: cluster.id, token: user.token, userId: '53c00d6d6ccaa6cb091bec4f' }
-          }, {
-            json: function(d) {
-              expect(d).to.eql({ error: 'no cluster found' });
-              done();
-            }
+      User.createWithToken({ redditName: 'Jack' }, function(e, jack) {
+        User.createWithToken({ redditName: 'ollie' }, function(e, ollie) {
+          new Cluster({ name: 'foo', owner: jack, public: false }).save(function(e, cluster) {
+            callRoute('/', {
+              query: { clusterId: cluster.id, token: ollie.token, userId: ollie.id }
+            }, {
+              json: function(d) {
+                expect(d).to.eql({ errors: ['no cluster found'] });
+                done();
+              }
+            });
           });
         });
       });
@@ -58,7 +60,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: user.token, userId: user.id }
+            query: { clusterId: cluster.id, token: user.token, userId: user.id }
           }, {
             json: function(d) {
               expect(d.name).to.eql('foo');
@@ -73,7 +75,7 @@ describe('cluster routes', function() {
       User.createWithToken({ redditName: 'Jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
-            query: { id: cluster.id, token: user.token }
+            query: { clusterId: cluster.id, token: user.token }
           }, {
             json: function(d) {
               expect(d.name).to.eql('foo');

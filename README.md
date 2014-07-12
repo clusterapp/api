@@ -16,7 +16,7 @@ The redirect will include a query string: `?user_id=USER_ID&user_name=USER_NAME&
 
 ## User
 
-####  GET `/users/?token=TOKEN&id=USER_ID`
+####  GET `/users/?token=TOKEN&userId=USER_ID`
 
 Given the user's reddit id and a token (given back to you in the authentication process), this will return you back an object representing the user:
 
@@ -28,7 +28,7 @@ Given the user's reddit id and a token (given back to you in the authentication 
 }
 ```
 
-#### POST `/users/updateLastActive?token=TOKEN&id=USER_ID`
+#### POST `/users/updateLastActive?token=TOKEN&userId=USER_ID`
 
 Updates the `lastActive` field on the user and returns the serialized user object.
 
@@ -42,25 +42,27 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 ## Clusters
 
-#### GET `/?id=CLUSTER_ID&token=USER_TOKEN`
+#### GET `/?clusterId=CLUSTER_ID&token=USER_TOKEN`
 
 Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
 
 ```json
 {
-"id": "abc1234",
-"name": "foo",
-"createdAt": "Thu Jul 10 2014",
-"owner": "abc65755757",
-"public": "true",
-"subreddits": ["vim", "code"],
-"admins": ["CDE123"],
-"subscribers": ["FEGE142"]
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
 }
 ```
 
 If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
 
+
+#### POST `/create?userId=USER_ID&token=USER_TOKEN`
 
 
 
