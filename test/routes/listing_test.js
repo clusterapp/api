@@ -39,7 +39,7 @@ describe('listings', function() {
     });
   });
 
-  describe.only('sorting the subreddit data', function() {
+  describe('sorting the subreddit data', function() {
     it('returns the raw json for each subreddit', function(done) {
       mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
       mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
@@ -49,7 +49,22 @@ describe('listings', function() {
           .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
         expect(data.angularjs.data.children[0].data.title)
           .to.eql("Angular\u2019s dependency injection annotation process");
+        done();
+      });
+    });
 
+    it.only('merges them together based on the scores of each', function(done) {
+      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+      var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+      listing.get({}, function(e, data) {
+        var result = data.sorted;
+        expect(result[0].title).to.eql("Angular\u2019s dependency injection annotation process");
+        expect(result[1].title)
+          .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
+        expect(result[2].title).to.eql("12 Vim Tips");
+        expect(result[3].title)
+          .to.eql("Using Scope.$watch() To Watch Functions In AngularJS");
         done();
       });
     });
