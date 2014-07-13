@@ -13,7 +13,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-if(!app.get('env') == 'test') {
+if(app.get('env') != 'test') {
   app.use(logger('dev'));
 }
 app.use(bodyParser.json());
