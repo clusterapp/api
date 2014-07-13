@@ -4,9 +4,9 @@ var User = require('./user_model');
 
 var Schema = mongoose.Schema;
 var clusterSchema = Schema({
-  name: String,
+  name: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  owner: { type: Schema.Types.ObjectId, ref: 'User' },
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   public: { type: Boolean, default: true },
   subreddits: [String],
   admins: [{ type: Schema.Types.ObjectId, ref: 'User' }],

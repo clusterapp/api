@@ -71,7 +71,7 @@ describe('Cluster model', function() {
   describe('.userHasPermission', function() {
     it('gives permission if cluster is public', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
-        new Cluster({ public: true, owner: user.id }).save(function(e, cluster) {
+        new Cluster({ name: 'foo', public: true, owner: user.id }).save(function(e, cluster) {
           Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
             expect(res).to.be(true);
             done();
@@ -95,7 +95,7 @@ describe('Cluster model', function() {
 
     it('does not gives perms when private if user is not admin or owner', function(done) {
       twoUsers(function(user1, user2) {
-        new Cluster({ public: false, owner: user2 }).save(function(e, cluster) {
+        new Cluster({ public: false, name: 'foo', owner: user2 }).save(function(e, cluster) {
           Cluster.userHasPermission(user1.id, cluster.id, function(res) {
             expect(res).to.be(false);
             done();
@@ -106,7 +106,7 @@ describe('Cluster model', function() {
 
     it('deals with no user id', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
-        new Cluster({ public: false, owner: user.id }).save(function(e, cluster) {
+        new Cluster({ public: false, name: 'foo', owner: user.id }).save(function(e, cluster) {
           Cluster.userHasPermission(undefined, cluster.id, function(res) {
             expect(res).to.be(false);
             done();
