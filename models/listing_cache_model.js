@@ -4,8 +4,15 @@ var moment = require('moment');
 var db = require('../database');
 
 //TODO: make the URL have a custom validator that checks uniqueness
+
+var urlIsUnique = function(value, done) {
+  ListingCache.find({ url: value }, function(e, result) {
+    return done(result.length == 0);
+  });
+};
+
 var cacheSchema = mongoose.Schema({
-  url: String,
+  url: { type: String, validate: [urlIsUnique, 'url is not unique'] },
   date: { type: Date, default: Date.now },
   data: Object
 });

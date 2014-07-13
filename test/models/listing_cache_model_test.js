@@ -6,6 +6,14 @@ var expect = require('expect.js');
 require('../test_db_config');
 
 describe('Listing Cache model', function() {
+  it('ensures the url is unique', function(done) {
+    new ListingCache({ url: 'foo' }).save(function(e, cache) {
+      new ListingCache({ url: 'foo' }).save(function(e, cache) {
+        expect(e.errors.url.message).to.eql('url is not unique');
+        done();
+      });
+    });
+  });
   describe('#hasExpired', function() {
     it('returns true if the date is more than an hour in the past', function(done) {
       new ListingCache({ url: 'foo' }).save(function(e, cache) {

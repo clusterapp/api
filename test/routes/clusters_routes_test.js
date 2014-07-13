@@ -277,7 +277,7 @@ describe('cluster routes', function() {
       });
     });
 
-    describe.only('caching of listings', function() {
+    describe('caching of listings', function() {
       it('stores the listing into the database', function(done) {
         mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
         mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
