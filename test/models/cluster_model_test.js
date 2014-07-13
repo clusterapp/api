@@ -84,13 +84,73 @@ describe('Cluster model', function() {
     new Cluster({ name: 'foo', owner: owner }).save(cb);
   };
 
-  describe.only('#saveAdmin', function() {
+  describe.only('#canEdit', function() {
+    it('is true for the owner', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        newCluster(user, function(e, cluster) {
+          expect(cluster.canEdit(user)).to.eql(true);
+          done();
+        });
+      });
+    });
+
+    it('is true for an admin', function(done) {
+      twoUsers(function(user1, user2) {
+        new Cluster({ name: 'foo', owner: user1, admins: [user2] }).save(function(e, cluster) {
+          expect(cluster.canEdit(user2)).to.eql(true);
+          done();
+        });
+      });
+    });
+
+    it('is false for any other id', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        newCluster(user, function(e, cluster) {
+          expect(cluster.canEdit('53c2bd6fe8531448469b5d49')).to.eql(false);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('#saveAdmin', function() {
     it('saves the admin', function(done) {
       twoUsers(function(user1, user2) {
         newCluster(user1, function(e, cluster) {
           cluster.saveAdmin(user2, function(e, cluster) {
-            expect(cluster.admins).to.eql([user2]);
+            expect(cluster.admins[0].toString()).to.eql(user2.id);
             done();
+          });
+        });
+      });
+    });
+
+    it('wont add the owner as an admin', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        newCluster(user, function(e, cluster) {
+          cluster.saveAdmin(user, function(e, cluster) {
+            expect(cluster.admins.length).to.eql(0);
+            done();
+          });
+        });
+      });
+    });
+
+    it('can add lots of admins', function(done) {
+      twoUsers(function(user1, user2) {
+        newCluster(user1, function(e, cluster) {
+          cluster.saveAdmin(user2, function(e, cluster) {
+            twoUsers(function(user3, user4) {
+              cluster.saveAdmin(user3, function(e, cluster) {
+                cluster.saveAdmin(user4, function(e, cluster) {
+                  expect(cluster.admins.length).to.eql(3);
+                  [user2, user3, user4].forEach(function(u, i) {
+                    expect(cluster.admins[i].toString()).to.eql(u.id);
+                  });
+                  done();
+                });
+              });
+            });
           });
         });
       });
