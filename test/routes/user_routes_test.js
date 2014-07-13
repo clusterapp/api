@@ -15,9 +15,25 @@ var callRoute = function(route, req, res) {
 };
 
 describe('user routes', function() {
+  describe.only('/destroyToken', function() {
+    it('destroys the user token', function(done) {
+      User.createWithToken({ redditName: 'foo' }, function(e, user) {
+        callRoute('/destroyToken', {
+          query: { userId: user.id, token: user.token }
+        }, {
+          json: function(d) {
+            User.findById(user.id, function(e, user) {
+              expect(user.token).to.eql(undefined);
+              done();
+            });
+          }
+        });
+      });
+    });
+  });
+
   describe('updateLastActive', function() {
     it('updates the last active date', function(done) {
-
       User.createWithToken({ redditName: 'jack' }, function(e, user) {
         var time = new Date(1893448800000); // January 1, 2030 00:00:00
         timekeeper.freeze(time); // Travel to that date.
