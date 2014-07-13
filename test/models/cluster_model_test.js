@@ -6,6 +6,18 @@ var async = require('async');
 require('../test_db_config');
 require('../shorter_stack_traces');
 
+var twoUsers = function(done) {
+  var users = [];
+  async.each(['jack', 'ollie'], function(name, cb) {
+    new User({ redditName: name }).save(function(e, user) {
+      users.push(user);
+      cb();
+    });
+  }, function() {
+    done(users[0], users[1]);
+  });
+};
+
 describe('Cluster model', function() {
   it('has an owner', function(done) {
     new User({ redditName: 'jack' }).save(function(e, user) {
@@ -68,6 +80,23 @@ describe('Cluster model', function() {
     });
   });
 
+  var newCluster = function(owner, cb) {
+    new Cluster({ name: 'foo', owner: owner }).save(cb);
+  };
+
+  describe.only('#saveAdmin', function() {
+    it('saves the admin', function(done) {
+      twoUsers(function(user1, user2) {
+        newCluster(user1, function(e, cluster) {
+          cluster.saveAdmin(user2, function(e, cluster) {
+            expect(cluster.admins).to.eql([user2]);
+            done();
+          });
+        });
+      });
+    });
+  });
+
   describe('.userHasPermission', function() {
     it('gives permission if cluster is public', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
@@ -80,18 +109,6 @@ describe('Cluster model', function() {
       });
     });
 
-
-    var twoUsers = function(done) {
-      var users = [];
-      async.each(['jack', 'ollie'], function(name, cb) {
-        new User({ redditName: name }).save(function(e, user) {
-          users.push(user);
-          cb();
-        });
-      }, function() {
-        done(users[0], users[1]);
-      });
-    };
 
     it('does not gives perms when private if user is not admin or owner', function(done) {
       twoUsers(function(user1, user2) {

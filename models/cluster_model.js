@@ -28,6 +28,11 @@ clusterSchema.methods.serialize = function() {
   return resp;
 };
 
+clusterSchema.methods.saveAdmin = function(user, cb) {
+  this.admins.push(user._id);
+  this.save(cb);
+}
+
 clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
   Cluster.findById(clusterId, function(e, cluster) {
     if(e) return cb(false);
