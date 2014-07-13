@@ -27,7 +27,7 @@ describe('cluster routes', function() {
     });
 
     it('errors if given a token and a user id that do not match', function(done) {
-      User.createWithToken({ redditname: 'jack' }, function(e, user) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
             query: { clusterId: cluster.id, userId: user.id, token: '12345' }
@@ -42,7 +42,7 @@ describe('cluster routes', function() {
     });
 
     it('errors if the token is invalid', function(done) {
-      User.createWithToken({ redditname: 'jack' }, function(e, user) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
             query: { clusterId: cluster.id, token: '12345' }
@@ -57,7 +57,7 @@ describe('cluster routes', function() {
     });
 
     it('allows access with no token if cluster is public', function(done) {
-      User.createWithToken({ redditname: 'jack' }, function(e, user) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
             query: { clusterId: cluster.id }
