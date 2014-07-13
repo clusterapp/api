@@ -59,6 +59,20 @@ var userRoutes = {
         });
       });
     }
+  },
+  '/destroyToken': {
+    method: 'post',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        User.findById(req.query.userId, function(e, user) {
+          user.token = undefined;
+          user.save(function(e, user) {
+            res.json({ success: 'token destroyed' });
+          });
+        });
+      });
+    }
   }
 };
 

@@ -40,6 +40,10 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 }
 ```
 
+#### POST `/users/destroyToken?token=TOKEN&userId=USER_ID`
+
+Destroys the token on the user, so any further requests with that token will fail.
+
 ## Clusters
 
 #### GET `/clusters/?clusterId=CLUSTER_ID&token=USER_TOKEN`
