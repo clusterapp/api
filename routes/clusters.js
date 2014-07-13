@@ -43,15 +43,16 @@ var clusterRoutes = {
         if(!valid) return;
         //TODO: test for SKIP_CACHE
         var needToCache, fullUrl;
+        //TODO: this if block is just weird
         if(!req.SKIP_CACHE) {
           fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-          //TODO: if cache already exists, use it instead of doing the stuff below
           needToCache = true;
         } else {
           needToCache = false;
         }
 
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
+          // TODO: abstract out some of the nesting here it's horrible
           if(hasPermission) {
             ListingCache.findOne({ url: fullUrl }, function(e, cache) {
               if(cache) {
