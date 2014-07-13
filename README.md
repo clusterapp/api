@@ -94,6 +94,8 @@ Returns a listing for the given cluster ID, as long as the user is able to view 
 
 Given a JSON body of key value pairs, will update the cluster with the properties given. Returns the new cluster.
 
+User must be either the owner or an admin of the cluster, or this will fail.
+
 
 
 

@@ -59,11 +59,6 @@ clusterSchema.methods.saveAdmin = function(user, cb) {
   this.save(cb);
 };
 
-clusterSchema.methods.canEdit = function(user) {
-  return (this.owner === user._id ||
-          this.admins.indexOf(user._id) > -1);
-};
-
 clusterSchema.methods.userIdCanEdit = function(userId) {
   return (this.owner.toString() === userId ||
           this.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1);

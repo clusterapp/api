@@ -84,11 +84,11 @@ describe('Cluster model', function() {
     new Cluster({ name: 'foo', owner: owner }).save(cb);
   };
 
-  describe('#canEdit', function() {
+  describe('#userIdCanEdit', function() {
     it('is true for the owner', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
         newCluster(user, function(e, cluster) {
-          expect(cluster.canEdit(user)).to.eql(true);
+          expect(cluster.userIdCanEdit(user.id)).to.eql(true);
           done();
         });
       });
@@ -97,7 +97,7 @@ describe('Cluster model', function() {
     it('is true for an admin', function(done) {
       twoUsers(function(user1, user2) {
         new Cluster({ name: 'foo', owner: user1, admins: [user2] }).save(function(e, cluster) {
-          expect(cluster.canEdit(user2)).to.eql(true);
+          expect(cluster.userIdCanEdit(user2.id)).to.eql(true);
           done();
         });
       });
@@ -106,7 +106,7 @@ describe('Cluster model', function() {
     it('is false for any other id', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
         newCluster(user, function(e, cluster) {
-          expect(cluster.canEdit('53c2bd6fe8531448469b5d49')).to.eql(false);
+          expect(cluster.userIdCanEdit('53c2bd6fe8531448469b5d49')).to.eql(false);
           done();
         });
       });
