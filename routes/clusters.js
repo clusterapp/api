@@ -11,6 +11,16 @@ ERRORS.NO_CLUSTER_FOUND = function() {
   return { errors: [ 'no cluster found' ] }
 };
 
+var formatValidationErrors = function(e) {
+  if(e) {
+    var errors = [];
+    for(var key in e.errors) {
+      errors.push(e.errors[key].message);
+    };
+    return { errors: errors };
+  }
+};
+
 var clusterRoutes = {
   '/': {
     method: 'get',
@@ -46,13 +56,7 @@ var clusterRoutes = {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
         new Cluster(req.body).save(function(e, cluster) {
-          if(e) {
-            var errors = [];
-            for(var key in e.errors) {
-              errors.push(e.errors[key].message);
-            };
-            return res.json({ errors: errors });
-          }
+          if(e) return res.json(formatValidationErrors(e));
           res.json(cluster.serialize());
         });
       });
@@ -69,14 +73,7 @@ var clusterRoutes = {
             cluster[key] = req.body[key];
           }
           cluster.save(function(e, cluster) {
-            if(e) {
-              var errors = [];
-              for(var key in e.errors) {
-                errors.push(e.errors[key].message);
-              };
-              return res.json({ errors: errors });
-            }
-
+            if(e) return res.json(formatValidationErrors(e));
             res.json(cluster.serialize());
           });
         });
