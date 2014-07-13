@@ -15,7 +15,7 @@ var callRoute = function(route, req, res) {
 };
 
 describe('user routes', function() {
-  describe.only('/destroyToken', function() {
+  describe('/destroyToken', function() {
     it('destroys the user token', function(done) {
       User.createWithToken({ redditName: 'foo' }, function(e, user) {
         callRoute('/destroyToken', {
