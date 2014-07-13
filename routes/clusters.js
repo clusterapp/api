@@ -67,8 +67,12 @@ var clusterRoutes = {
     fn: function(req, res) {
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
+
         // we have to do this and not update because an update skips validations
         Cluster.findById(req.query.clusterId, function(e, cluster) {
+          if(!cluster.userIdCanEdit(req.query.userId)) {
+            return res.json({ errors: ['no permission to update cluster'] });
+          }
           for(var key in req.body) {
             cluster[key] = req.body[key];
           }

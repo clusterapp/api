@@ -211,6 +211,28 @@ describe('cluster routes', function() {
       });
     });
 
+    it('only allows those with permission to update', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        User.createWithToken({ redditName: 'bob' }, function(e, bob) {
+          callRoute('/update', {
+            query: { userId: bob.id, token: bob.token, clusterId: cluster.id },
+            body: { subreddits: ['nufc'] }
+          },
+          {
+            json: function(d) {
+              expect(d.errors).to.eql(['no permission to update cluster']);
+              Cluster.findById(cluster.id, function(e, cluster) {
+                expect(cluster.subreddits.length).to.eql(2);
+                done();
+              });
+            }
+          });
+        });
+      });
+    });
     it('only allows properties on the model to exist', function(done) {
       createUserAndCluster({
         user: { redditName: 'jack' },

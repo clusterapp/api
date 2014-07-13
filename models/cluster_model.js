@@ -64,6 +64,11 @@ clusterSchema.methods.canEdit = function(user) {
           this.admins.indexOf(user._id) > -1);
 };
 
+clusterSchema.methods.userIdCanEdit = function(userId) {
+  return (this.owner.toString() === userId ||
+          this.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1);
+};
+
 clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
   Cluster.findById(clusterId, function(e, cluster) {
     if(e) return cb(false);
