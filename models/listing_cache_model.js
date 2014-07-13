@@ -3,9 +3,11 @@ var moment = require('moment');
 
 var db = require('../database');
 
+//TODO: make the URL have a custom validator that checks uniqueness
 var cacheSchema = mongoose.Schema({
   url: String,
   date: { type: Date, default: Date.now },
+  data: Object
 });
 
 cacheSchema.methods.hasExpired = function() {

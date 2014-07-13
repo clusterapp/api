@@ -4,6 +4,7 @@ var express = require('express');
 var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
+var ListingCache = require('../models/listing_cache_model');
 var validateParamsExist = require('./param_validator');
 var Listing = require('./listing');
 
@@ -36,12 +37,29 @@ var clusterRoutes = {
   '/listing': {
     method: 'get',
     fn: function(req, res) {
+
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
+        //TODO: test for SKIP_CACHE
+        var needToCache, fullUrl;
+        if(!req.SKIP_CACHE) {
+          fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+          //TODO: if cache already exists, use it instead of doing the stuff below
+          needToCache = true;
+        } else {
+          needToCache = false;
+        }
+
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           if(hasPermission) {
             new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
-              res.json(listing);
+              if(needToCache) {
+                new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
+                  res.json(listing);
+                });
+              } else {
+                res.json(listing);
+              }
             });
           } else {
             res.json(ERRORS.NO_CLUSTER_FOUND());

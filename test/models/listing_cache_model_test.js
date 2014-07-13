@@ -5,7 +5,7 @@ var expect = require('expect.js');
 
 require('../test_db_config');
 
-describe.only('Listing Cache model', function() {
+describe('Listing Cache model', function() {
   describe('#hasExpired', function() {
     it('returns true if the date is more than an hour in the past', function(done) {
       new ListingCache({ url: 'foo' }).save(function(e, cache) {

@@ -5,6 +5,7 @@ require('../shorter_stack_traces');
 
 var User = require('../../models/user_model');
 var Cluster = require('../../models/cluster_model');
+var ListingCache = require('../../models/listing_cache_model');
 
 require('../test_db_config');
 
@@ -263,7 +264,10 @@ describe('cluster routes', function() {
         cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
       }, function(user, cluster) {
         callRoute('/listing', {
-          query: { userId: user.id, token: user.token, clusterId: cluster.id }
+          query: { userId: user.id, token: user.token, clusterId: cluster.id },
+          protocol: 'http',
+          get: function() { return 'localhost:3000'; },
+          originalUrl: '/clusters/listing?a=1'
         }, {
           json: function(d) {
             expect(d.sorted.length).to.be(10);
@@ -273,12 +277,42 @@ describe('cluster routes', function() {
       });
     });
 
+    describe.only('caching of listings', function() {
+      it('stores the listing into the database', function(done) {
+        mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+        mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        createUserAndCluster({
+          user: { redditName: 'jack' },
+          cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+        }, function(user, cluster) {
+          callRoute('/listing', {
+            query: { userId: user.id, token: user.token, clusterId: cluster.id },
+            protocol: 'http',
+            get: function() { return 'localhost:3000'; },
+            originalUrl: '/clusters/listing?a=1'
+          }, {
+            json: function(d) {
+              var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+              ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+                expect(cache).to.be.ok();
+                expect(cache.data.sorted.length).to.be(10);
+                done();
+              });
+            }
+          });
+        });
+      });
+    });
+
     it('says no cluster found if user does not have permissions', function(done) {
       User.createWithToken({ redditName: 'jack' }, function(e, jack) {
         new User({ redditName: 'ollie' }).save(function(e, ollie) {
           new Cluster({ name: 'foo', owner: ollie, public: false }).save(function(e, cluster) {
             callRoute('/listing', {
-              query: { userId: jack.id, token: jack.token, clusterId: cluster.id }
+              query: { userId: jack.id, token: jack.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
             }, {
               json: function(d) {
                 expect(d).to.eql({ errors: [ 'no cluster found' ] });
