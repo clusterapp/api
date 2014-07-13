@@ -15,7 +15,7 @@ var clusterRoutes = {
   '/': {
     method: 'get',
     fn: function(req, res) {
-      validateParamsExist(['clusterId', 'token'], req, res, function(valid) {
+      validateParamsExist(['clusterId'], req, res, function(valid) {
         if(!valid) return;
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());

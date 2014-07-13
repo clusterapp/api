@@ -1,6 +1,7 @@
 var expect = require('expect.js');
 
 var clusterRoutes = require('../../routes/clusters').endpoints;
+require('../shorter_stack_traces');
 
 var User = require('../../models/user_model');
 var Cluster = require('../../models/cluster_model');
@@ -19,20 +20,35 @@ describe('cluster routes', function() {
     it('errors if no id given', function(done) {
       callRoute('/', { query: {} }, {
         json: function(d) {
-          expect(d).to.eql({ errors: [ 'parameter clusterId is required', 'parameter token is required' ] });
+          expect(d).to.eql({ errors: [ 'parameter clusterId is required' ] });
           done();
         }
       });
     });
 
     it('errors if the token is invalid', function(done) {
-      User.createWithToken({ redditName: 'Jack' }, function(e, user) {
+      User.createWithToken({ redditname: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
           callRoute('/', {
             query: { clusterId: cluster.id, token: '12345' }
           }, {
             json: function(d) {
               expect(d).to.eql({ errors: ['parameter: token is not valid'] });
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('allows access with no token if cluster is public', function(done) {
+      User.createWithToken({ redditname: 'jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+          callRoute('/', {
+            query: { clusterId: cluster.id }
+          }, {
+            json: function(d) {
+              expect(d.name).to.eql('foo');
               done();
             }
           });
