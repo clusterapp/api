@@ -153,6 +153,85 @@ describe('cluster routes', function() {
     });
   });
 
+  describe('/update', function() {
+    it('updates the cluster', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/update', {
+          query: { userId: user.id, token: user.token, clusterId: cluster.id },
+          body: { public: false }
+        },
+        {
+          json: function(d) {
+            expect(d.name).to.eql('foo');
+            expect(d.public).to.eql(false);
+            done();
+          }
+        });
+      });
+    });
+
+    it('still ensures the name is unique', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster1) {
+        new Cluster({ name: 'bar', owner: user }).save(function(cluster2) {
+          callRoute('/update', {
+            query: { userId: user.id, token: user.token, clusterId: cluster1.id },
+            body: { name: 'bar' }
+          },
+          {
+            json: function(d) {
+              expect(d.errors).to.eql(['cluster name is not unique']);
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('allows valid name changes', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/update', {
+          query: { userId: user.id, token: user.token, clusterId: cluster.id },
+          body: { name: 'bar' }
+        },
+        {
+          json: function(d) {
+            expect(d.name).to.eql('bar');
+            done();
+          }
+        });
+      });
+    });
+
+    it('only allows properties on the model to exist', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/update', {
+          query: { userId: user.id, token: user.token, clusterId: cluster.id },
+          body: { foo: false }
+        },
+        {
+          json: function(d) {
+            Cluster.findById(cluster.id, function(e, cluster) {
+              expect(d.foo).to.not.be.ok();
+              done();
+            });
+          }
+        });
+      });
+    });
+  });
+
   describe('/listing', function() {
     it('returns the data for a valid request', function(done) {
       mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');

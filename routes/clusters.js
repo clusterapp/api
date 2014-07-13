@@ -57,6 +57,31 @@ var clusterRoutes = {
         });
       });
     }
+  },
+  '/update': {
+    method: 'post',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
+        if(!valid) return;
+        // we have to do this and not update because an update skips validations
+        Cluster.findById(req.query.clusterId, function(e, cluster) {
+          for(var key in req.body) {
+            cluster[key] = req.body[key];
+          }
+          cluster.save(function(e, cluster) {
+            if(e) {
+              var errors = [];
+              for(var key in e.errors) {
+                errors.push(e.errors[key].message);
+              };
+              return res.json({ errors: errors });
+            }
+
+            res.json(cluster.serialize());
+          });
+        });
+      });
+    }
   }
 };
 
