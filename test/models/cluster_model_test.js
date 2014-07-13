@@ -84,7 +84,7 @@ describe('Cluster model', function() {
     new Cluster({ name: 'foo', owner: owner }).save(cb);
   };
 
-  describe.only('#canEdit', function() {
+  describe('#canEdit', function() {
     it('is true for the owner', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
         newCluster(user, function(e, cluster) {
