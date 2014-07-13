@@ -1,6 +1,8 @@
 var User = require('../../models/user_model');
 var timekeeper = require('timekeeper');
 var expect = require('expect.js');
+var async = require('async');
+var Cluster = require('../../models/cluster_model');
 
 require('../test_db_config');
 

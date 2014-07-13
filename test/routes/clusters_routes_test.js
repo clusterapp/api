@@ -16,6 +16,40 @@ var callRoute = function(route, req, res) {
 };
 
 describe('cluster routes', function() {
+  describe('/create', function() {
+    it('creates a cluster', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        callRoute('/create', {
+          query: { userId: user.id, token: user.token },
+          body: { owner: user.id, name: 'foo' }
+        }, {
+          json: function(d) {
+            expect(d.name).to.eql('foo');
+            done();
+          }
+        });
+      });
+    });
+
+    it('doesnt allow non unique names', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        new Cluster({ owner: user.id, name: 'foo' }).save(function(e, cluster) {
+          callRoute('/create', {
+            query: { userId: user.id, token: user.token },
+            body: { owner: user.id, name: 'foo' }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({
+                errors: [ 'cluster name is not unique' ]
+              });
+              done();
+            }
+          });
+        });
+      });
+    });
+  });
+
   describe('/', function() {
     it('errors if no id given', function(done) {
       callRoute('/', { query: {} }, {

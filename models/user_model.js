@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var db = require('../database');
 var crypto = require('crypto');
 
+var Cluster = require('./cluster_model');
+
 var userSchema = mongoose.Schema({
   redditName: String,
   lastActive: { type: Date, default: Date.now },
@@ -33,6 +35,7 @@ userSchema.statics.createWithToken = function(opts, cb) {
     });
   });
 };
+
 
 userSchema.methods.serialize = function() {
   return {
