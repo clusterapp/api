@@ -26,6 +26,21 @@ describe('cluster routes', function() {
       });
     });
 
+    it('errors if given a token and a user id that do not match', function(done) {
+      User.createWithToken({ redditname: 'jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+          callRoute('/', {
+            query: { clusterId: cluster.id, userId: user.id, token: '12345' }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({ errors: ['parameter: token is not valid'] });
+              done();
+            }
+          });
+        });
+      });
+    });
+
     it('errors if the token is invalid', function(done) {
       User.createWithToken({ redditname: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
