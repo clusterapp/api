@@ -3,8 +3,17 @@ var db = require('../database');
 var User = require('./user_model');
 
 var Schema = mongoose.Schema;
+
+var nameValidator = function(value, done) {
+  User.findById(this.owner, function(e, user) {
+    Cluster.clusterNameIsUnique(user, value, function(res) {
+      return done(res);
+    });
+  });
+};
+
 var clusterSchema = Schema({
-  name: { type: String, required: true },
+  name: { type: String, validate: [nameValidator, 'cluster name is not unique'] },
   createdAt: { type: Date, default: Date.now },
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   public: { type: Boolean, default: true },
@@ -55,18 +64,6 @@ clusterSchema.statics.clustersForUser = function(user, cb) {
     cb(null, clusters.map(function(c) { return c.serialize() }));
   });
 };
-
-clusterSchema.pre('save', true, function(next, done) {
-  User.findById(this.owner, function(e, user) {
-    Cluster.clusterNameIsUnique(user, this.name, function(res) {
-      if(res) {
-        next() & done();
-      } else {
-        next(new Error("cluster name is not unique")) & done();
-      }
-    });
-  }.bind(this));
-});
 
 var Cluster = mongoose.model('Cluster', clusterSchema);
 
