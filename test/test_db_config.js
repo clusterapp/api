@@ -3,6 +3,8 @@ var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
 var ListingCache = require('../models/listing_cache_model');
 var async = require('async');
+var nock = require('nock');
+
 
 
 var tidyUp = function(done) {

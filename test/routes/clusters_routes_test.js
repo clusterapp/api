@@ -6,6 +6,8 @@ require('../shorter_stack_traces');
 var User = require('../../models/user_model');
 var Cluster = require('../../models/cluster_model');
 var ListingCache = require('../../models/listing_cache_model');
+var nock = require('nock');
+
 
 require('../test_db_config');
 
@@ -265,9 +267,7 @@ describe('cluster routes', function() {
       }, function(user, cluster) {
         callRoute('/listing', {
           query: { userId: user.id, token: user.token, clusterId: cluster.id },
-          protocol: 'http',
-          get: function() { return 'localhost:3000'; },
-          originalUrl: '/clusters/listing?a=1'
+          SKIP_CACHE: true
         }, {
           json: function(d) {
             expect(d.sorted.length).to.be(10);
@@ -279,11 +279,10 @@ describe('cluster routes', function() {
 
     describe('caching of listings', function() {
       it('stores the listing into the database', function(done) {
-        mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
         mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
         createUserAndCluster({
           user: { redditName: 'jack' },
-          cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
+          cluster: { name: 'foo', subreddits: ['vim'] }
         }, function(user, cluster) {
           callRoute('/listing', {
             query: { userId: user.id, token: user.token, clusterId: cluster.id },
@@ -293,12 +292,38 @@ describe('cluster routes', function() {
           }, {
             json: function(d) {
               var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
-              ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'},
+                                   function(e, cache) {
                 expect(cache).to.be.ok();
-                expect(cache.data.sorted.length).to.be(10);
+                expect(cache.data.sorted.length).to.be(5);
                 done();
               });
             }
+          });
+        });
+      });
+
+      it('does not make the api req once cached', function(done) {
+        var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+        new ListingCache({ url: fullUrl, data: { foo: 2 }}).save(function(e, cache) {
+          createUserAndCluster({
+            user: { redditName: 'jack' },
+            cluster: { name: 'foo', subreddits: ['vim'] }
+          }, function(user, cluster) {
+            callRoute('/listing', {
+              query: { userId: user.id, token: user.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
+            }, {
+              json: function(d) {
+                expect(vimMock.isDone()).to.be(false);
+                expect(d.fromCache).to.eql(true);
+                nock.cleanAll();
+                done();
+              }
+            });
           });
         });
       });

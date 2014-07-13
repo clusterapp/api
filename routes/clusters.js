@@ -1,6 +1,7 @@
 // all these routes are nested under /clusters
 
 var express = require('express');
+var _ = require('underscore');
 var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
@@ -52,13 +53,19 @@ var clusterRoutes = {
 
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           if(hasPermission) {
-            new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
-              if(needToCache) {
-                new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
-                  res.json(listing);
-                });
+            ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+              if(cache) {
+                return res.json(_.extend(cache.data, { fromCache: true }));
               } else {
-                res.json(listing);
+                new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
+                  if(needToCache) {
+                    new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
+                      res.json(listing);
+                    });
+                  } else {
+                    res.json(listing);
+                  }
+                });
               }
             });
           } else {

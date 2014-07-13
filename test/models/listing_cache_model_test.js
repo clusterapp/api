@@ -14,6 +14,7 @@ describe('Listing Cache model', function() {
       });
     });
   });
+
   describe('#hasExpired', function() {
     it('returns true if the date is more than an hour in the past', function(done) {
       new ListingCache({ url: 'foo' }).save(function(e, cache) {
