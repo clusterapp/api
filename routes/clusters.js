@@ -47,7 +47,7 @@ var clusterRoutes = {
         if(!valid) return;
         new Cluster(req.body).save(function(e, cluster) {
           if(e) {
-            return res.json({ error: e.message });
+            return res.json({ errors: [e.message] });
           }
           res.json(cluster.serialize());
         });

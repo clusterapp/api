@@ -125,19 +125,4 @@ describe('User model', function() {
     });
   });
 
-  describe('#ownedClusters', function() {
-    it('returns a list of cluster ids for a user', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        async.each(['foo', 'bar'], function(name, cb) {
-          new Cluster({ name: name, owner: user }).save(cb);
-        }, function(e) {
-          user.ownedClusters(function(e, clusters) {
-            expect(clusters.map(function(c) { return c.name; }))
-              .to.eql(['foo', 'bar']);
-            done();
-          });
-        });
-      });
-    });
-  });
 });

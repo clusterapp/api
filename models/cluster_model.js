@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var db = require('../database');
+var User = require('./user_model');
 
 var Schema = mongoose.Schema;
 var clusterSchema = Schema({
@@ -40,12 +41,32 @@ clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
 };
 
 clusterSchema.statics.clusterNameIsUnique = function(user, clusterName, cb) {
-  user.ownedClusters(function(e, clusters) {
-    var names = clusters.map(function(c) { return c.name.toLowerCase(); });
-
-    cb(!(names.indexOf(clusterName.toLowerCase()) > -1));
+  Cluster.find({
+    owner: user.id,
+    name: new RegExp('^' + clusterName + '$', 'i')
+  }, function(e, clusters) {
+    cb(clusters.length === 0);
   });
 };
+
+clusterSchema.statics.clustersForUser = function(user, cb) {
+  Cluster.find({ owner: user._id }, function(e, clusters) {
+    if(e) return cb(e);
+    cb(null, clusters.map(function(c) { return c.serialize() }));
+  });
+};
+
+clusterSchema.pre('save', true, function(next, done) {
+  User.findById(this.owner, function(e, user) {
+    Cluster.clusterNameIsUnique(user, this.name, function(res) {
+      if(res) {
+        next() & done();
+      } else {
+        next(new Error("cluster name is not unique")) & done();
+      }
+    });
+  }.bind(this));
+});
 
 var Cluster = mongoose.model('Cluster', clusterSchema);
 

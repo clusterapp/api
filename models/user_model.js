@@ -36,12 +36,6 @@ userSchema.statics.createWithToken = function(opts, cb) {
   });
 };
 
-userSchema.methods.ownedClusters = function(cb) {
-  Cluster.find({ owner: this._id }, function(e, clusters) {
-    if(e) return cb(e);
-    cb(null, clusters.map(function(c) { return c.serialize() }));
-  });
-};
 
 userSchema.methods.serialize = function() {
   return {

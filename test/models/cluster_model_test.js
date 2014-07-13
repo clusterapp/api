@@ -17,7 +17,7 @@ describe('Cluster model', function() {
   });
 
 
-  describe.only('#clusterNameIsUnique', function() {
+  describe('#clusterNameIsUnique', function() {
     it('returns false is name is used', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
         async.each(['foo', 'bar'], function(name, cb) {
@@ -70,19 +70,33 @@ describe('Cluster model', function() {
 
   describe('.userHasPermission', function() {
     it('gives permission if cluster is public', function(done) {
-      new Cluster({ public: true }).save(function(e, cluster) {
-        Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
-          expect(res).to.be(true);
-          done();
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new Cluster({ public: true, owner: user.id }).save(function(e, cluster) {
+          Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
+            expect(res).to.be(true);
+            done();
+          });
         });
       });
     });
 
 
+    var twoUsers = function(done) {
+      var users = [];
+      async.each(['jack', 'ollie'], function(name, cb) {
+        new User({ redditName: name }).save(function(e, user) {
+          users.push(user);
+          cb();
+        });
+      }, function() {
+        done(users[0], users[1]);
+      });
+    };
+
     it('does not gives perms when private if user is not admin or owner', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        new Cluster({ public: false }).save(function(e, cluster) {
-          Cluster.userHasPermission('53c00d6d6ccaa6cb091bec4f', cluster.id, function(res) {
+      twoUsers(function(user1, user2) {
+        new Cluster({ public: false, owner: user2 }).save(function(e, cluster) {
+          Cluster.userHasPermission(user1.id, cluster.id, function(res) {
             expect(res).to.be(false);
             done();
           });
@@ -91,18 +105,21 @@ describe('Cluster model', function() {
     });
 
     it('deals with no user id', function(done) {
-      new Cluster({ public: false }).save(function(e, cluster) {
-        Cluster.userHasPermission(undefined, cluster.id, function(res) {
-          expect(res).to.be(false);
-          done();
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new Cluster({ public: false, owner: user.id }).save(function(e, cluster) {
+          Cluster.userHasPermission(undefined, cluster.id, function(res) {
+            expect(res).to.be(false);
+            done();
+          });
         });
       });
     });
 
     it('gives perms when private if user is admin', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        new Cluster({ name: 'foo', admins: [user], public: false }).save(function(e, cluster) {
-          Cluster.userHasPermission(user.id, cluster.id, function(res) {
+      twoUsers(function(user1, user2) {
+        new Cluster({ name: 'foo', admins: [user2], owner: user1, public: false })
+        .save(function(e, cluster) {
+          Cluster.userHasPermission(user2.id, cluster.id, function(res) {
             expect(res).to.be(true);
             done();
           });
@@ -115,6 +132,21 @@ describe('Cluster model', function() {
         new Cluster({ name: 'foo', owner: user, public: false }).save(function(e, cluster) {
           Cluster.userHasPermission(user.id, cluster.id, function(res) {
             expect(res).to.be(true);
+            done();
+          });
+        });
+      });
+    });
+  });
+  describe('#ownedClusters', function() {
+    it('returns a list of cluster ids for a user', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        async.each(['foo', 'bar'], function(name, cb) {
+          new Cluster({ name: name, owner: user }).save(cb);
+        }, function(e) {
+          Cluster.clustersForUser(user, function(e, clusters) {
+            expect(clusters.map(function(c) { return c.name; }))
+              .to.eql(['foo', 'bar']);
             done();
           });
         });
