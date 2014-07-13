@@ -11,6 +11,16 @@ ERRORS.NO_CLUSTER_FOUND = function() {
   return { errors: [ 'no cluster found' ] }
 };
 
+var formatValidationErrors = function(e) {
+  if(e) {
+    var errors = [];
+    for(var key in e.errors) {
+      errors.push(e.errors[key].message);
+    };
+    return { errors: errors };
+  }
+};
+
 var clusterRoutes = {
   '/': {
     method: 'get',
@@ -46,14 +56,30 @@ var clusterRoutes = {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
         new Cluster(req.body).save(function(e, cluster) {
-          if(e) {
-            var errors = [];
-            for(var key in e.errors) {
-              errors.push(e.errors[key].message);
-            };
-            return res.json({ errors: errors });
-          }
+          if(e) return res.json(formatValidationErrors(e));
           res.json(cluster.serialize());
+        });
+      });
+    }
+  },
+  '/update': {
+    method: 'post',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
+        if(!valid) return;
+
+        // we have to do this and not update because an update skips validations
+        Cluster.findById(req.query.clusterId, function(e, cluster) {
+          if(!cluster.userIdCanEdit(req.query.userId)) {
+            return res.json({ errors: ['no permission to update cluster'] });
+          }
+          for(var key in req.body) {
+            cluster[key] = req.body[key];
+          }
+          cluster.save(function(e, cluster) {
+            if(e) return res.json(formatValidationErrors(e));
+            res.json(cluster.serialize());
+          });
         });
       });
     }

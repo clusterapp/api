@@ -5,11 +5,25 @@ var User = require('./user_model');
 var Schema = mongoose.Schema;
 
 var nameValidator = function(value, done) {
-  User.findById(this.owner, function(e, user) {
-    Cluster.clusterNameIsUnique(user, value, function(res) {
-      return done(res);
+  Cluster.findOne({ name: value, owner: this.owner }, function(e, cluster) {
+    // if a cluster exists with this name and the same owner
+    // and the IDs match, that means it's this one
+    // and the name is not being changed, so must be valid
+    if(cluster && this._id) {
+      if(cluster._id.toString() == this._id.toString()) {
+        return done(true);
+      }
+    }
+
+    // if we get here that means this user/name combo does
+    // not exist, so we have to go and make sure the chosen name
+    // is valid
+    User.findById(this.owner, function(e, user) {
+      Cluster.clusterNameIsUnique(user, value, function(res) {
+        return done(res);
+      });
     });
-  });
+  }.bind(this));
 };
 
 var clusterSchema = Schema({
@@ -45,9 +59,9 @@ clusterSchema.methods.saveAdmin = function(user, cb) {
   this.save(cb);
 };
 
-clusterSchema.methods.canEdit = function(user) {
-  return (this.owner === user._id ||
-          this.admins.indexOf(user._id) > -1);
+clusterSchema.methods.userIdCanEdit = function(userId) {
+  return (this.owner.toString() === userId ||
+          this.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1);
 };
 
 clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {

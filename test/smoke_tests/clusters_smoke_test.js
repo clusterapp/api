@@ -74,3 +74,20 @@ describe('/create', function() {
   });
 });
 
+describe('/update', function() {
+  it('updates the cluster', function(done) {
+    User.createWithToken({ redditName: 'jack' }, function(e, user) {
+      new Cluster({ owner: user, name: 'foo' }).save(function(e, cluster) {
+        $.post(URL_BASE + '/update', { 
+          userId: user.id, token: user.token, clusterId: cluster.id
+        }, JSON.stringify({
+          subreddits: ['vim']
+        }), function(e, json) {
+          expect(json.subreddits).to.eql(['vim']);
+          done();
+        });
+      });
+    });
+  });
+});
+
