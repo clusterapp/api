@@ -39,6 +39,14 @@ clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
   });
 };
 
+clusterSchema.statics.clusterNameIsUnique = function(user, clusterName, cb) {
+  user.ownedClusters(function(e, clusters) {
+    var names = clusters.map(function(c) { return c.name.toLowerCase(); });
+
+    cb(!(names.indexOf(clusterName.toLowerCase()) > -1));
+  });
+};
+
 var Cluster = mongoose.model('Cluster', clusterSchema);
 
 module.exports = Cluster;

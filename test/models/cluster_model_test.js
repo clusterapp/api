@@ -1,8 +1,10 @@
 var Cluster = require('../../models/cluster_model');
 var User = require('../../models/user_model');
 var expect = require('expect.js');
+var async = require('async');
 
 require('../test_db_config');
+require('../shorter_stack_traces');
 
 describe('Cluster model', function() {
   it('has an owner', function(done) {
@@ -10,6 +12,48 @@ describe('Cluster model', function() {
       new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
         expect(cluster.owner).to.eql(user._id);
         done();
+      });
+    });
+  });
+
+
+  describe.only('#clusterNameIsUnique', function() {
+    it('returns false is name is used', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        async.each(['foo', 'bar'], function(name, cb) {
+          new Cluster({ name: name, owner: user }).save(cb);
+        }, function(e) {
+          Cluster.clusterNameIsUnique(user, 'foo', function(res) {
+            expect(res).to.eql(false);
+            done();
+          });
+        });
+      });
+    });
+
+    it('returns true if name is unique', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        async.each(['foo', 'bar'], function(name, cb) {
+          new Cluster({ name: name, owner: user }).save(cb);
+        }, function(e) {
+          Cluster.clusterNameIsUnique(user, 'code', function(res) {
+            expect(res).to.eql(true);
+            done();
+          });
+        });
+      });
+    });
+
+    it('is case insensitive', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        async.each(['foo', 'bar'], function(name, cb) {
+          new Cluster({ name: name, owner: user }).save(cb);
+        }, function(e) {
+          Cluster.clusterNameIsUnique(user, 'FOO', function(res) {
+            expect(res).to.eql(false);
+            done();
+          });
+        });
       });
     });
   });

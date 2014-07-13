@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var db = require('../database');
 var crypto = require('crypto');
 
+var Cluster = require('./cluster_model');
+
 var userSchema = mongoose.Schema({
   redditName: String,
   lastActive: { type: Date, default: Date.now },
@@ -31,6 +33,13 @@ userSchema.statics.createWithToken = function(opts, cb) {
     user.saveNewToken(function(e, user) {
       return cb(e, user);
     });
+  });
+};
+
+userSchema.methods.ownedClusters = function(cb) {
+  Cluster.find({ owner: this._id }, function(e, clusters) {
+    if(e) return cb(e);
+    cb(null, clusters.map(function(c) { return c.serialize() }));
   });
 };
 
