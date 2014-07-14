@@ -266,8 +266,7 @@ describe('cluster routes', function() {
         cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
       }, function(user, cluster) {
         callRoute('/listing', {
-          query: { userId: user.id, token: user.token, clusterId: cluster.id },
-          SKIP_CACHE: true
+          query: { userId: user.id, token: user.token, clusterId: cluster.id, SKIP_CACHE: true },
         }, {
           json: function(d) {
             expect(d.sorted.length).to.be(10);
@@ -277,7 +276,7 @@ describe('cluster routes', function() {
       });
     });
 
-    describe.only('caching of listings', function() {
+    describe('caching of listings', function() {
       afterEach(nock.cleanAll);
 
       it('stores the listing into the database', function(done) {
