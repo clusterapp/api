@@ -276,7 +276,7 @@ describe('cluster routes', function() {
       });
     });
 
-    describe.only('caching of listings', function() {
+    describe('caching of listings', function() {
       afterEach(nock.cleanAll);
 
       it('stores the listing into the database', function(done) {
