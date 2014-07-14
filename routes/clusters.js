@@ -27,12 +27,9 @@ var writeCacheAndGetListing = function(opts, cb) {
   var cluster = opts.cluster;
   var after = opts.req.query.after;
   var fullUrl = opts.fullUrl;
-  var skipCache = opts.req.query.SKIP_CACHE;
   var cache = opts.cache;
 
   new Listing(cluster).get({ after: after }, function(e, listing) {
-    if(skipCache) return cb(listing);
-
     if(cache) {
       ListingCache.update({ url: fullUrl }, {
         date: Date.now(), data: listing
@@ -66,9 +63,8 @@ var clusterRoutes = {
 
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
-        //TODO: test for SKIP_CACHE
-        var fullUrl;
 
+        var fullUrl;
         if(!req.query.SKIP_CACHE) {
           fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
         }
@@ -76,9 +72,20 @@ var clusterRoutes = {
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
           if(!hasPermission) return res.json(ERRORS.NO_CLUSTER_FOUND());
 
+          var listingFromCache = function(listing, fromCache) {
+            return _.extend(listing, { fromCache: fromCache });
+          };
+
+          if(req.query.SKIP_CACHE) {
+            new Listing(cluster).get({ after: after }, function(e, listing) {
+              return res.json(listingFromCache(listing, false));
+            });
+            return;
+          }
+
           ListingCache.findOne({ url: fullUrl }, function(e, cache) {
             if(cache && cache.notExpired()) {
-              return res.json(_.extend(cache.data, { fromCache: true }));
+              return res.json(listingFromCache(cache.data, true));
             }
 
             // by this point, we know we dont have a cached instance
@@ -88,7 +95,7 @@ var clusterRoutes = {
               fullUrl: fullUrl,
               cache: cache
             }, function(listing) {
-              return res.json(_.extend(listing, { fromCache: false }));
+              return res.json(listingFromCache(listing, false));
             });
           });
         });

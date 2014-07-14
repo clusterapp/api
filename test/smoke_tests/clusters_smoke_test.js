@@ -13,9 +13,9 @@ var $ = require('./helpers');
 var mock = require('../routes/mock_reddit_api');
 
 describe('/listing', function() {
+  afterEach(nock.cleanAll);
+
   it('gets a cluster listing', function(done) {
-    // smoke tests don't usually have mocks, but this avoids making
-    // a real request to the reddit api
     var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
     var angMock = mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
     User.createWithToken({ redditName: 'jack' }, function(e, user) {
@@ -41,8 +41,6 @@ describe('/listing', function() {
   });
 
   it('uses the cache if one exists', function(done) {
-    // smoke tests don't usually have mocks, but this avoids making
-    // a real request to the reddit api
     var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
     User.createWithToken({ redditName: 'jack' }, function(e, user) {
       new Cluster({
@@ -59,11 +57,9 @@ describe('/listing', function() {
           }, function(e, json) {
             expect(json.fromCache).to.eql(true);
             expect(vimMock.isDone()).to.be(false);
-            nock.cleanAll();
             done();
           });
         });
-
       });
     });
   });
