@@ -10,12 +10,6 @@ var tidyUp = function(done) {
   }, done);
 };
 
-before(function(done) {
-  db.on('open', function() {
-    tidyUp(done);
-  })
-});
-
 after(function(done) {
   db.close(done);
 });
