@@ -8,8 +8,9 @@ require('../shorter_stack_traces');
 require('../test_db_config');
 
 describe('listings', function() {
+  //TODO: write more caching tests about expiry, etc
   describe('api endpoints', function() {
-    it.only('has the endpoints cached', function(done) {
+    it('has the endpoints cached', function(done) {
       var vimMock = mock('/r/vim/hot.json');
       var angularjsMock = mock('/r/angularjs/hot.json');
       var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
