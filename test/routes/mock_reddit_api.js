@@ -9,8 +9,15 @@ var mock = function(subUrl, response) {
 }
 
 mock.withFile = function(subUrl, file) {
-  return mock(subUrl, fs.readFileSync(file));
+  if(!mock.CACHE[file]) {
+    mock.CACHE[file] = fs.readFileSync(file);
+  };
+
+  return mock(subUrl, mock.CACHE[file]);
 };
+
+mock.CACHE = {
+}
 
 module.exports = mock;
 
