@@ -277,7 +277,9 @@ describe('cluster routes', function() {
       });
     });
 
-    describe('caching of listings', function() {
+    describe.only('caching of listings', function() {
+      afterEach(nock.cleanAll);
+
       it('stores the listing into the database', function(done) {
         mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
         createUserAndCluster({
@@ -303,6 +305,36 @@ describe('cluster routes', function() {
         });
       });
 
+      it('recaches once the cache has expired', function(done) {
+        var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+        new ListingCache({ url: fullUrl, data: { foo: 2 }}).save(function(e, cache) {
+          createUserAndCluster({
+            user: { redditName: 'jack' },
+            cluster: { name: 'foo', subreddits: ['vim'] }
+          }, function(user, cluster) {
+            var now = new Date(Date.now());
+            var twoHoursLater = now.setHours(now.getHours() + 2);
+            timekeeper.freeze(twoHoursLater); // Travel to that date.
+            callRoute('/listing', {
+              query: { userId: user.id, token: user.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
+            }, {
+              json: function(d) {
+                expect(vimMock.isDone()).to.be(true);
+                ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+                  expect(new Date(cache.date)).to.eql(new Date(twoHoursLater));
+                  done();
+                  timekeeper.reset();
+                });
+              }
+            });
+          });
+        });
+      });
+
       it('does not make the api req once cached', function(done) {
         var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
         var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
@@ -320,7 +352,6 @@ describe('cluster routes', function() {
               json: function(d) {
                 expect(vimMock.isDone()).to.be(false);
                 expect(d.fromCache).to.eql(true);
-                nock.cleanAll();
                 done();
               }
             });

@@ -23,6 +23,33 @@ var formatValidationErrors = function(e) {
   }
 };
 
+var processListing = function(opts, cb) {
+  var cluster = opts.cluster;
+  var after = opts.req.query.after;
+  var fullUrl = opts.fullUrl;
+  var skipCache = opts.req.query.SKIP_CACHE;
+  var cache = opts.cache;
+
+  new Listing(cluster).get({ after: after }, function(e, listing) {
+    if(cache && cache.hasExpired()) {
+      ListingCache.update({ url: fullUrl }, {
+        date: Date.now(), data: listing
+      }, function() {
+        return cb(listing);
+      });
+    } else {
+      if(!skipCache) {
+        new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
+          return cb(listing);
+        });
+      } else {
+        return cb(listing);
+      }
+    }
+  });
+};
+
+
 var clusterRoutes = {
   '/': {
     method: 'get',
@@ -42,32 +69,28 @@ var clusterRoutes = {
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
         //TODO: test for SKIP_CACHE
-        var needToCache, fullUrl;
-        //TODO: this if block is just weird
-        if(!req.SKIP_CACHE) {
+        var fullUrl;
+
+        if(!req.query.SKIP_CACHE) {
           fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-          needToCache = true;
-        } else {
-          needToCache = false;
         }
 
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
-          // TODO: abstract out some of the nesting here it's horrible
           if(hasPermission) {
             ListingCache.findOne({ url: fullUrl }, function(e, cache) {
-              if(cache) {
+              if(cache && !cache.hasExpired()) {
                 return res.json(_.extend(cache.data, { fromCache: true }));
-              } else {
-                new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
-                  if(needToCache) {
-                    new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
-                      res.json(listing);
-                    });
-                  } else {
-                    res.json(listing);
-                  }
-                });
               }
+
+              // by this point, we know we dont have a cached instance
+              processListing({
+                cluster: cluster,
+                req: req,
+                fullUrl: fullUrl,
+                cache: cache
+              }, function(listing) {
+                return res.json(listing);
+              });
             });
           } else {
             res.json(ERRORS.NO_CLUSTER_FOUND());
