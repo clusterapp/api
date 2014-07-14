@@ -1,6 +1,8 @@
 var expect = require('expect.js');
 var mock = require('./mock_reddit_api.js');
 var Listing = require('../../routes/listing');
+require('../shorter_stack_traces');
+require('../test_db_config');
 
 describe('listings', function() {
   describe('api endpoints', function() {
