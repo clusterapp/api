@@ -23,7 +23,7 @@ var formatValidationErrors = function(e) {
   }
 };
 
-var processListing = function(opts, cb) {
+var writeCacheAndGetListing = function(opts, cb) {
   var cluster = opts.cluster;
   var after = opts.req.query.after;
   var fullUrl = opts.fullUrl;
@@ -31,20 +31,18 @@ var processListing = function(opts, cb) {
   var cache = opts.cache;
 
   new Listing(cluster).get({ after: after }, function(e, listing) {
-    if(cache && cache.hasExpired()) {
+    if(skipCache) return cb(listing);
+
+    if(cache) {
       ListingCache.update({ url: fullUrl }, {
         date: Date.now(), data: listing
       }, function() {
         return cb(listing);
       });
     } else {
-      if(!skipCache) {
-        new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
-          return cb(listing);
-        });
-      } else {
+      new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
         return cb(listing);
-      }
+      });
     }
   });
 };
@@ -76,25 +74,23 @@ var clusterRoutes = {
         }
 
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
-          if(hasPermission) {
-            ListingCache.findOne({ url: fullUrl }, function(e, cache) {
-              if(cache && !cache.hasExpired()) {
-                return res.json(_.extend(cache.data, { fromCache: true }));
-              }
+          if(!hasPermission) return res.json(ERRORS.NO_CLUSTER_FOUND());
 
-              // by this point, we know we dont have a cached instance
-              processListing({
-                cluster: cluster,
-                req: req,
-                fullUrl: fullUrl,
-                cache: cache
-              }, function(listing) {
-                return res.json(listing);
-              });
+          ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+            if(cache && cache.notExpired()) {
+              return res.json(_.extend(cache.data, { fromCache: true }));
+            }
+
+            // by this point, we know we dont have a cached instance
+            writeCacheAndGetListing({
+              cluster: cluster,
+              req: req,
+              fullUrl: fullUrl,
+              cache: cache
+            }, function(listing) {
+              return res.json(_.extend(listing, { fromCache: false }));
             });
-          } else {
-            res.json(ERRORS.NO_CLUSTER_FOUND());
-          }
+          });
         });
       });
     }

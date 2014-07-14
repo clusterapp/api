@@ -23,6 +23,10 @@ cacheSchema.methods.hasExpired = function() {
   return now.diff(createdAt, 'hours') > 1;
 };
 
+cacheSchema.methods.notExpired = function() {
+  return !this.hasExpired();
+};
+
 var ListingCache = mongoose.model('ListingCache', cacheSchema)
 
 module.exports = ListingCache;
