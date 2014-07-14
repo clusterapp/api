@@ -1,9 +1,11 @@
 // all these routes are nested under /clusters
 
 var express = require('express');
+var _ = require('underscore');
 var ERRORS = require('./error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
+var ListingCache = require('../models/listing_cache_model');
 var validateParamsExist = require('./param_validator');
 var Listing = require('./listing');
 
@@ -21,6 +23,28 @@ var formatValidationErrors = function(e) {
   }
 };
 
+var writeCacheAndGetListing = function(opts, cb) {
+  var cluster = opts.cluster;
+  var after = opts.req.query.after;
+  var fullUrl = opts.fullUrl;
+  var cache = opts.cache;
+
+  new Listing(cluster).get({ after: after }, function(e, listing) {
+    if(cache) {
+      ListingCache.update({ url: fullUrl }, {
+        date: Date.now(), data: listing
+      }, function() {
+        return cb(listing);
+      });
+    } else {
+      new ListingCache({ url: fullUrl, data: listing }).save(function(e, cache) {
+        return cb(listing);
+      });
+    }
+  });
+};
+
+
 var clusterRoutes = {
   '/': {
     method: 'get',
@@ -36,16 +60,44 @@ var clusterRoutes = {
   '/listing': {
     method: 'get',
     fn: function(req, res) {
+
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
+
+        var fullUrl;
+        if(!req.query.SKIP_CACHE) {
+          fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+        }
+
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
-          if(hasPermission) {
-            new Listing(cluster).get({ after: req.query.after }, function(e, listing) {
-              res.json(listing);
+          if(!hasPermission) return res.json(ERRORS.NO_CLUSTER_FOUND());
+
+          var listingFromCache = function(listing, fromCache) {
+            return _.extend(listing, { fromCache: fromCache });
+          };
+
+          if(req.query.SKIP_CACHE) {
+            new Listing(cluster).get({ after: after }, function(e, listing) {
+              return res.json(listingFromCache(listing, false));
             });
-          } else {
-            res.json(ERRORS.NO_CLUSTER_FOUND());
+            return;
           }
+
+          ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+            if(cache && cache.notExpired()) {
+              return res.json(listingFromCache(cache.data, true));
+            }
+
+            // by this point, we know we dont have a cached instance
+            writeCacheAndGetListing({
+              cluster: cluster,
+              req: req,
+              fullUrl: fullUrl,
+              cache: cache
+            }, function(listing) {
+              return res.json(listingFromCache(listing, false));
+            });
+          });
         });
       });
     }

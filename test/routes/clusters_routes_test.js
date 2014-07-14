@@ -5,6 +5,9 @@ require('../shorter_stack_traces');
 
 var User = require('../../models/user_model');
 var Cluster = require('../../models/cluster_model');
+var ListingCache = require('../../models/listing_cache_model');
+var nock = require('nock');
+
 
 require('../test_db_config');
 
@@ -263,7 +266,7 @@ describe('cluster routes', function() {
         cluster: { name: 'foo', subreddits: ['vim', 'angularjs'] }
       }, function(user, cluster) {
         callRoute('/listing', {
-          query: { userId: user.id, token: user.token, clusterId: cluster.id }
+          query: { userId: user.id, token: user.token, clusterId: cluster.id, SKIP_CACHE: true },
         }, {
           json: function(d) {
             expect(d.sorted.length).to.be(10);
@@ -273,12 +276,122 @@ describe('cluster routes', function() {
       });
     });
 
+    describe('caching of listings', function() {
+      afterEach(nock.cleanAll);
+
+      it('will skip the cache if given the param SKIP_CACHE', function(done) {
+        var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+        new ListingCache({ url: fullUrl, data: { foo: 2 }}).save(function(e, cache) {
+          createUserAndCluster({
+            user: { redditName: 'jack' },
+            cluster: { name: 'foo', subreddits: ['vim'] }
+          }, function(user, cluster) {
+            callRoute('/listing', {
+              query: { SKIP_CACHE: true, userId: user.id, token: user.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1',
+            }, {
+              json: function(d) {
+                expect(vimMock.isDone()).to.be(true);
+                expect(d.fromCache).to.eql(false);
+                done();
+              }
+            });
+          });
+        });
+      });
+
+      it('stores the listing into the database', function(done) {
+        mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        createUserAndCluster({
+          user: { redditName: 'jack' },
+          cluster: { name: 'foo', subreddits: ['vim'] }
+        }, function(user, cluster) {
+          callRoute('/listing', {
+            query: { userId: user.id, token: user.token, clusterId: cluster.id },
+            protocol: 'http',
+            get: function() { return 'localhost:3000'; },
+            originalUrl: '/clusters/listing?a=1'
+          }, {
+            json: function(d) {
+              var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'},
+                                   function(e, cache) {
+                expect(cache).to.be.ok();
+                expect(cache.data.sorted.length).to.be(5);
+                done();
+              });
+            }
+          });
+        });
+      });
+
+      it('recaches once the cache has expired', function(done) {
+        var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+        new ListingCache({ url: fullUrl, data: { foo: 2 }}).save(function(e, cache) {
+          createUserAndCluster({
+            user: { redditName: 'jack' },
+            cluster: { name: 'foo', subreddits: ['vim'] }
+          }, function(user, cluster) {
+            var now = new Date(Date.now());
+            var twoHoursLater = now.setHours(now.getHours() + 2);
+            timekeeper.freeze(twoHoursLater); // Travel to that date.
+            callRoute('/listing', {
+              query: { userId: user.id, token: user.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
+            }, {
+              json: function(d) {
+                expect(vimMock.isDone()).to.be(true);
+                ListingCache.findOne({ url: fullUrl }, function(e, cache) {
+                  expect(new Date(cache.date)).to.eql(new Date(twoHoursLater));
+                  done();
+                  timekeeper.reset();
+                });
+              }
+            });
+          });
+        });
+      });
+
+      it('does not make the api req once cached', function(done) {
+        var vimMock = mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+        var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
+        new ListingCache({ url: fullUrl, data: { foo: 2 }}).save(function(e, cache) {
+          createUserAndCluster({
+            user: { redditName: 'jack' },
+            cluster: { name: 'foo', subreddits: ['vim'] }
+          }, function(user, cluster) {
+            callRoute('/listing', {
+              query: { userId: user.id, token: user.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
+            }, {
+              json: function(d) {
+                expect(vimMock.isDone()).to.be(false);
+                expect(d.fromCache).to.eql(true);
+                done();
+              }
+            });
+          });
+        });
+      });
+    });
+
     it('says no cluster found if user does not have permissions', function(done) {
       User.createWithToken({ redditName: 'jack' }, function(e, jack) {
         new User({ redditName: 'ollie' }).save(function(e, ollie) {
           new Cluster({ name: 'foo', owner: ollie, public: false }).save(function(e, cluster) {
             callRoute('/listing', {
-              query: { userId: jack.id, token: jack.token, clusterId: cluster.id }
+              query: { userId: jack.id, token: jack.token, clusterId: cluster.id },
+              protocol: 'http',
+              get: function() { return 'localhost:3000'; },
+              originalUrl: '/clusters/listing?a=1'
             }, {
               json: function(d) {
                 expect(d).to.eql({ errors: [ 'no cluster found' ] });

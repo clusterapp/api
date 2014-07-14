@@ -33,7 +33,7 @@ describe('listings', function() {
       var wtfMock = mock('/r/wtf/hot.json');
       var listing = new Listing({ subreddits: ['vim', 'angularjs', 'wtf'] });
       listing.get({}, function() {
-        expectMocksToBeCalled(vimMock, angularjsMock, wtfMock)
+        expectMocksToBeCalled(vimMock, angularjsMock, wtfMock);
         done();
       });
     });
