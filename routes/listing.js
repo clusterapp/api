@@ -33,7 +33,9 @@ Listing.prototype._orderResults = function(results) {
   var length = results[this.cluster.subreddits[0]].data.children.length;
   var subredditCount = this.cluster.subreddits.length;
   if(subredditCount === 1) {
-    results.sorted = results[this.cluster.subreddits[0]].data.children;
+    results.sorted = results[this.cluster.subreddits[0]].data.children.map(function(item) {
+      return item.data;
+    });
     return;
   }
 
