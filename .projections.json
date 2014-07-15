@@ -6,5 +6,21 @@
   "test/routes/*_routes_test.js": {
     "alternate": "routes/{}.js",
     "type": "test"
+  },
+  "models/*_model.js": {
+    "alternate": "test/models/{}_model_test.js",
+    "type": "source"
+  },
+  "test/models/*_model_test.js": {
+    "alternate": "models/{}_model.js",
+    "type": "test"
+  },
+  "lib/*.js": {
+    "alternate": "test/lib/{}_test.js",
+    "type": "source"
+  },
+  "test/lib/*_test.js": {
+    "alternate": "lib/{}.js",
+    "type": "source"
   }
 }
