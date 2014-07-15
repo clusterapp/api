@@ -96,9 +96,9 @@ Returns an array of clusters, each being one the user is subscribed to.
 
 ## Clusters
 
-#### GET `/clusters/?clusterId=CLUSTER_ID&token=USER_TOKEN`
+#### GET `/clusters/?clusterId=CLUSTER_ID`
 
-Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
+Given a cluster id, will return a serialized object representing the cluster:
 
 ```json
 {
@@ -113,7 +113,11 @@ Given a cluster id, and a token of the active user, will return a serialized obj
 }
 ```
 
-If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
+If a cluster is private, you'll need to pass the user's ID and the user's token. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
+
+#### GET `/clusters/name?clusterRoute=CLUSTER_ROUTE`
+
+Given a cluster route (for example `/jack/foo`), will return the cluster. Similarly to the GET `/clusters` method, if the cluster is private, you'll need to pass in a user ID and a user token.
 
 
 #### POST `/clusters/create?userId=USER_ID&token=USER_TOKEN`

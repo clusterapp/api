@@ -53,6 +53,85 @@ describe('cluster routes', function() {
     });
   });
 
+  describe('/name', function() {
+    it('errors if given a token and a user id that do not match', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+          callRoute('/name', {
+            query: { clusterRoute: 'jack/foo', userId: user.id, token: '12345' }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({ errors: ['parameter: token is not valid'] });
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('errors if the token is invalid', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+          callRoute('/name', {
+            query: { clusterRoute: 'jack/foo', token: '12345' }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({ errors: ['parameter: token is not valid'] });
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('allows access with no token if cluster is public', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+          callRoute('/name', {
+            query: { clusterRoute: 'jack/foo' }
+          }, {
+            json: function(d) {
+              expect(d.name).to.eql('foo');
+              done();
+            }
+          });
+        });
+      });
+    });
+
+    it('does not return a private cluster if userId is not owner or admin', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, jack) {
+        User.createWithToken({ redditName: 'ollie' }, function(e, ollie) {
+          new Cluster({ name: 'foo', owner: jack, public: false }).save(function(e, cluster) {
+            callRoute('/name', {
+              query: { clusterRoute: '/jack/foo', token: ollie.token, userId: ollie.id }
+            }, {
+              json: function(d) {
+                expect(d).to.eql({ errors: ['no cluster found'] });
+                done();
+              }
+            });
+          });
+        });
+      });
+    });
+
+    it('returns a private cluster if the user is the owner', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, jack) {
+        new Cluster({ name: 'foo', owner: jack, public: false }).save(function(e, cluster) {
+          callRoute('/name', {
+            query: { clusterRoute: '/jack/foo', token: jack.token, userId: jack.id }
+          }, {
+            json: function(d) {
+              expect(d.name).to.eql('foo');
+              done();
+            }
+          });
+        });
+      });
+    });
+  });
+
   describe('/', function() {
     it('errors if no id given', function(done) {
       callRoute('/', { query: {} }, {
