@@ -113,6 +113,45 @@ describe('Cluster model', function() {
     });
   });
 
+  describe('#saveSubscriber', function() {
+    it('saves the admin', function(done) {
+      twoUsers(function(user1, user2) {
+        newCluster(user1, function(e, cluster) {
+          cluster.saveSubscriber(user2, function(e, cluster) {
+            expect(cluster.subscribers[0].toString()).to.eql(user2.id);
+            done();
+          });
+        });
+      });
+    });
+
+    it('wont add the owner as an admin', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        newCluster(user, function(e, cluster) {
+          cluster.saveSubscriber(user, function(e, cluster) {
+            expect(cluster.subscribers.length).to.eql(0);
+            done();
+          });
+        });
+      });
+    });
+
+    it('wont add an admin as a subscriber', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        new User({ redditName: 'ollie' }).save(function(e, ollie) {
+          newCluster(user, function(e, cluster) {
+            cluster.saveAdmin(ollie, function(e, cluster) {
+              cluster.saveSubscriber(ollie, function(e, cluster) {
+                expect(cluster.subscribers.length).to.eql(0);
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('#saveAdmin', function() {
     it('saves the admin', function(done) {
       twoUsers(function(user1, user2) {
@@ -223,7 +262,7 @@ describe('Cluster model', function() {
         }, function(e) {
           Cluster.clustersForUser(user, function(e, clusters) {
             expect(clusters.map(function(c) { return c.name; }))
-              .to.eql(['foo', 'bar']);
+            .to.eql(['foo', 'bar']);
             done();
           });
         });

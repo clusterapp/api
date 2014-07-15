@@ -85,6 +85,32 @@ var userRoutes = {
         });
       });
     }
+  },
+  '/clusters/admin': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.find({
+          admins: { $in: [req.query.userId] }
+        }, function(e, clusters) {
+          res.json(clusters.map(function(c) { return c.serialize(); }));
+        })
+      });
+    }
+  },
+  '/clusters/subscriber': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.find({
+          subscribers: { $in: [req.query.userId] }
+        }, function(e, clusters) {
+          res.json(clusters.map(function(c) { return c.serialize(); }));
+        })
+      });
+    }
   }
 };
 

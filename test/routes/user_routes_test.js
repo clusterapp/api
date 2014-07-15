@@ -44,7 +44,53 @@ describe('user routes', function() {
         });
       });
     });
+    describe('/admin', function() {
+      it('lists the clusters the user is an admin of', function(done) {
+        createUserAndCluster({
+          user: { redditName: 'jack' },
+          cluster: { name: 'foo' }
+        }, function(user, cluster) {
+          User.createWithToken({ redditName: 'ollie' }, function(e, ollie) {
+            cluster.saveAdmin(ollie, function(e, cluster) {
+              callRoute('/clusters/admin', {
+                query: { userId: ollie.id, token: ollie.token }
+              }, {
+                json: function(d) {
+                  expect(d.length).to.eql(1);
+                  expect(d[0].name).to.eql('foo');
+                  done();
+                }
+              });
+            });
+          });
+        });
+      });
+    });
+
+    describe('/subscriber', function() {
+      it('lists the clusters the user has subscribed to', function(done) {
+        createUserAndCluster({
+          user: { redditName: 'jack' },
+          cluster: { name: 'foo' }
+        }, function(user, cluster) {
+          User.createWithToken({ redditName: 'ollie' }, function(e, ollie) {
+            cluster.saveSubscriber(ollie, function(e, cluster) {
+              callRoute('/clusters/subscriber', {
+                query: { userId: ollie.id, token: ollie.token }
+              }, {
+                json: function(d) {
+                  expect(d.length).to.eql(1);
+                  expect(d[0].name).to.eql('foo');
+                  done();
+                }
+              });
+            });
+          });
+        });
+      });
+    });
   });
+
 
   describe('/destroyToken', function() {
     it('destroys the user token', function(done) {
