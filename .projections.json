@@ -1,0 +1,10 @@
+{
+  "routes/*.rb": {
+    "alternate": "test/routes/{}_routes_test.js",
+    "type": "source"
+  },
+  "test/routes/*_routes_test.js": {
+    "alternate": "routes/{}.js",
+    "type": "test"
+  }
+}
