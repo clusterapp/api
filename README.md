@@ -152,6 +152,21 @@ Given a JSON body of key value pairs, will update the cluster with the propertie
 
 User must be either the owner or an admin of the cluster, or this will fail.
 
+## Reddit
+
+#### GET `/reddit/popular?limit=LIMIT&token=TOKEN&userId=USER_ID`
+
+Returns a list of popular subreddits, limited by the `limit` param (default is 100).
+
+```json
+[
+  {
+    "title": "funny",
+    ...
+  }
+]
+```
+
 
 
 

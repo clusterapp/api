@@ -4,9 +4,9 @@ var express = require('express');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
 
-var ERRORS = require('./error_messages');
+var ERRORS = require('../lib/error_messages');
 
-var validateParamsExist = require('./param_validator');
+var validateParamsExist = require('../lib/param_validator');
 
 var validateParams = function(req, res, cb) {
   if(!req.query || !req.query.id) {
