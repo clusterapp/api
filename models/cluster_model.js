@@ -86,7 +86,11 @@ clusterSchema.statics.clusterNameIsUnique = function(user, clusterName, cb) {
 };
 
 clusterSchema.statics.clustersForUser = function(user, cb) {
-  Cluster.find({ owner: user._id }, function(e, clusters) {
+  return Cluster.clustersForUserId(user._id, cb);
+};
+
+clusterSchema.statics.clustersForUserId = function(userId, cb) {
+  Cluster.find({ owner: userId }, function(e, clusters) {
     if(e) return cb(e);
     cb(null, clusters.map(function(c) { return c.serialize() }));
   });
