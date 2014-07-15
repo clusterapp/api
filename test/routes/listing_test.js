@@ -9,8 +9,7 @@ require('../shorter_stack_traces');
 require('../test_db_config');
 
 describe('listings', function() {
-  //TODO: write more caching tests about expiry, etc
-  describe.only('api endpoints', function() {
+  describe('api endpoints', function() {
     describe('caching', function() {
       afterEach(nock.cleanAll);
       it('uses the cache if it exists', function(done) {
