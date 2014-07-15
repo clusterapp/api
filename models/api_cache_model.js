@@ -5,7 +5,7 @@ var db = require('../database');
 
 var schema = require('./cache_schema');
 
-var ListingCache = mongoose.model('ListingCache', schema)
+var ApiCache = mongoose.model('ApiCache', schema)
 
-module.exports = ListingCache;
+module.exports = ApiCache;
 

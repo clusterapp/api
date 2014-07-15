@@ -44,11 +44,61 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 Destroys the token on the user, so any further requests with that token will fail.
 
+#### GET `/users/owner?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user created.
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
+#### GET `/users/admin?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user is an admin of.
+
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
+#### GET `/users/subscribers?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user is subscribed to.
+
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
 ## Clusters
 
-#### GET `/clusters/?clusterId=CLUSTER_ID&token=USER_TOKEN`
+#### GET `/clusters/?clusterId=CLUSTER_ID`
 
-Given a cluster id, and a token of the active user, will return a serialized object representing the cluster:
+Given a cluster id, will return a serialized object representing the cluster:
 
 ```json
 {
@@ -63,7 +113,11 @@ Given a cluster id, and a token of the active user, will return a serialized obj
 }
 ```
 
-If a cluster is private, you'll need to pass a third parameter: `userId=USER_ID`. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
+If a cluster is private, you'll need to pass the user's ID and the user's token. This ID must be the ID of either the owner of the Cluster or one of the admins for data to be returned.
+
+#### GET `/clusters/name?clusterRoute=CLUSTER_ROUTE`
+
+Given a cluster route (for example `/jack/foo`), will return the cluster. Similarly to the GET `/clusters` method, if the cluster is private, you'll need to pass in a user ID and a user token.
 
 
 #### POST `/clusters/create?userId=USER_ID&token=USER_TOKEN`

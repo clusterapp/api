@@ -2,6 +2,7 @@
 
 var express = require('express');
 var User = require('../models/user_model');
+var Cluster = require('../models/cluster_model');
 
 var ERRORS = require('../lib/error_messages');
 
@@ -71,6 +72,43 @@ var userRoutes = {
             res.json({ success: 'token destroyed' });
           });
         });
+      });
+    }
+  },
+  '/clusters/own': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.clustersForUserId(req.query.userId, function(e, clusters) {
+          res.json(clusters);
+        });
+      });
+    }
+  },
+  '/clusters/admin': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.find({
+          admins: { $in: [req.query.userId] }
+        }, function(e, clusters) {
+          res.json(clusters.map(function(c) { return c.serialize(); }));
+        })
+      });
+    }
+  },
+  '/clusters/subscriber': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.find({
+          subscribers: { $in: [req.query.userId] }
+        }, function(e, clusters) {
+          res.json(clusters.map(function(c) { return c.serialize(); }));
+        })
       });
     }
   }

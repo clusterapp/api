@@ -5,6 +5,7 @@ var timekeeper = require('timekeeper');
 
 
 var User = require('../../models/user_model');
+var Cluster = require('../../models/cluster_model');
 
 var URL_BASE = 'http://127.0.0.1:9765/users';
 
@@ -20,6 +21,22 @@ describe('/', function() {
           redditName: 'jack'
         });
         done();
+      });
+    });
+  });
+});
+
+describe('/clusters/own', function() {
+  it('lists the clusters the user owns', function(done) {
+    User.createWithToken({ redditName: 'jack' }, function(e, user) {
+      new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
+        $.get(URL_BASE + '/clusters/own', {
+          userId: user.id, token: user.token
+        }, function(e, json) {
+          expect(json.length).to.eql(1);
+          expect(json[0].name).to.eql('foo');
+          done();
+        });
       });
     });
   });
