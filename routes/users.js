@@ -3,6 +3,8 @@
 var express = require('express');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
+var async = require('async');
+
 
 var ERRORS = require('../lib/error_messages');
 
@@ -93,8 +95,8 @@ var userRoutes = {
     fn: function(req, res) {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
-        Cluster.clustersForUserId(req.query.userId, function(e, clusters) {
-          res.json(clusters);
+        Cluster.find({ owner: req.query.userId }, function(e, clusters) {
+          Cluster.serializeList(clusters, res.json.bind(res));
         });
       });
     }
@@ -107,7 +109,7 @@ var userRoutes = {
         Cluster.find({
           admins: { $in: [req.query.userId] }
         }, function(e, clusters) {
-          res.json(clusters.map(function(c) { return c.serialize(); }));
+          Cluster.serializeList(clusters, res.json.bind(res));
         })
       });
     }
@@ -120,7 +122,7 @@ var userRoutes = {
         Cluster.find({
           subscribers: { $in: [req.query.userId] }
         }, function(e, clusters) {
-          res.json(clusters.map(function(c) { return c.serialize(); }));
+          Cluster.serializeList(clusters, res.json.bind(res));
         })
       });
     }

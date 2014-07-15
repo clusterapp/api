@@ -64,11 +64,11 @@ Returns an array of clusters, each being one the user created.
   "id": "abc1234",
   "name": "foo",
   "createdAt": "Thu Jul 10 2014",
-  "owner": "abc65755757",
+  "owner": { user_object }
   "public": "true",
   "subreddits": ["vim", "code"],
-  "admins": ["CDE123"],
-  "subscribers": ["FEGE142"]
+  "admins": [{ user_object }, { user_object }],
+  "subscribers": [{ user_object }, { user_object }]
 }, {...}]
 ```
 
@@ -81,30 +81,17 @@ Returns an array of clusters, each being one the user is an admin of.
   "id": "abc1234",
   "name": "foo",
   "createdAt": "Thu Jul 10 2014",
-  "owner": "abc65755757",
+  "owner": {...},
   "public": "true",
   "subreddits": ["vim", "code"],
-  "admins": ["CDE123"],
-  "subscribers": ["FEGE142"]
+  "admins": [...],
+  "subscribers": [...]
 }, {...}]
 ```
 
 #### GET `/users/clusters/subscribed?token=TOKEN&userId=USER_ID`
 
 Returns an array of clusters, each being one the user is subscribed to.
-
-```json
-[{
-  "id": "abc1234",
-  "name": "foo",
-  "createdAt": "Thu Jul 10 2014",
-  "owner": "abc65755757",
-  "public": "true",
-  "subreddits": ["vim", "code"],
-  "admins": ["CDE123"],
-  "subscribers": ["FEGE142"]
-}, {...}]
-```
 
 ## Clusters
 
@@ -117,11 +104,11 @@ Given a cluster id, will return a serialized object representing the cluster:
   "id": "abc1234",
   "name": "foo",
   "createdAt": "Thu Jul 10 2014",
-  "owner": "abc65755757",
+  "owner": {...}
   "public": "true",
   "subreddits": ["vim", "code"],
-  "admins": ["CDE123"],
-  "subscribers": ["FEGE142"]
+  "admins": [{...}],
+  "subscribers": [{...}]
 }
 ```
 

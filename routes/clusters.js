@@ -52,7 +52,11 @@ var clusterRoutes = {
       validateParamsExist(['clusterId'], req, res, function(valid) {
         if(!valid) return;
         Cluster.userHasPermission(req.query.userId, req.query.clusterId, function(hasPermission, cluster) {
-          res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
+          if(hasPermission) {
+            cluster.serialize(res.json.bind(res));
+          } else {
+            res.json(ERRORS.NO_CLUSTER_FOUND());
+          }
         });
       });
     }
@@ -68,7 +72,11 @@ var clusterRoutes = {
         User.findOne({ redditName: userName }, function(e, user) {
           Cluster.findOne({ owner: user, name: clusterName }, function(e, cluster) {
             Cluster.userHasPermission(req.query.userId, cluster.id, function(hasPermission, cluster) {
-              res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
+              if(hasPermission) {
+                cluster.serialize(res.json.bind(res));
+              } else {
+                res.json(ERRORS.NO_CLUSTER_FOUND());
+              }
             });
           });
         });
@@ -127,7 +135,7 @@ var clusterRoutes = {
         if(!valid) return;
         new Cluster(req.body).save(function(e, cluster) {
           if(e) return res.json(formatValidationErrors(e));
-          res.json(cluster.serialize());
+          cluster.serialize(res.json.bind(res));
         });
       });
     }
@@ -148,7 +156,7 @@ var clusterRoutes = {
           }
           cluster.save(function(e, cluster) {
             if(e) return res.json(formatValidationErrors(e));
-            res.json(cluster.serialize());
+            cluster.serialize(res.json.bind(res));
           });
         });
       });

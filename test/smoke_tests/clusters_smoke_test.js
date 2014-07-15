@@ -74,7 +74,11 @@ describe('/', function() {
             id: cluster.id,
             name: cluster.name,
             createdAt: cluster.createdAt.toString(),
-            owner: user.id,
+            owner: {
+              id: user.id,
+              redditName: 'jack',
+              lastActive: user.lastActive.toString(),
+            },
             public: true,
             subreddits: [],
             admins: [],
@@ -95,7 +99,7 @@ describe('/create', function() {
         name: 'foo'
       }), function(e, json) {
         expect(json.name).to.eql('foo');
-        expect(json.owner).to.eql(user.id);
+        expect(json.owner.id).to.eql(user.id);
         done();
       });
     });
