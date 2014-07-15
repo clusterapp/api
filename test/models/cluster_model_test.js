@@ -28,48 +28,6 @@ describe.only('Cluster model', function() {
     });
   });
 
-
-  describe('#clusterNameIsUnique', function() {
-    it('returns false is name is used', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        async.each(['foo', 'bar'], function(name, cb) {
-          new Cluster({ name: name, owner: user }).save(cb);
-        }, function(e) {
-          Cluster.clusterNameIsUnique(user, 'foo', function(res) {
-            expect(res).to.eql(false);
-            done();
-          });
-        });
-      });
-    });
-
-    it('returns true if name is unique', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        async.each(['foo', 'bar'], function(name, cb) {
-          new Cluster({ name: name, owner: user }).save(cb);
-        }, function(e) {
-          Cluster.clusterNameIsUnique(user, 'code', function(res) {
-            expect(res).to.eql(true);
-            done();
-          });
-        });
-      });
-    });
-
-    it('is case insensitive', function(done) {
-      new User({ redditName: 'jack' }).save(function(e, user) {
-        async.each(['foo', 'bar'], function(name, cb) {
-          new Cluster({ name: name, owner: user }).save(cb);
-        }, function(e) {
-          Cluster.clusterNameIsUnique(user, 'FOO', function(res) {
-            expect(res).to.eql(false);
-            done();
-          });
-        });
-      });
-    });
-  });
-
   describe('#serialize', function() {
     it('only has the expected keys', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
