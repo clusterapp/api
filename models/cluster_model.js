@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var db = require('../database');
 var User = require('./user_model');
+var async = require('async');
+
 
 var Schema = mongoose.Schema;
 
@@ -35,7 +37,17 @@ var clusterSchema = Schema({
   subscribers: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
-clusterSchema.methods.serialize = function() {
+clusterSchema.statics.serializeList = function(clusters, done) {
+  async.map(clusters, function(cluster, cb) {
+    cluster.serialize(function(res) {
+      cb(null, res);
+    });
+  }, function(e, serialized) {
+    done(serialized);
+  });
+}
+
+clusterSchema.methods.serialize = function(callback) {
   var resp = {
     public: this.public,
     subreddits: this.subreddits,
@@ -43,11 +55,16 @@ clusterSchema.methods.serialize = function() {
     subscribers: this.subscribers.map(function(admin) { return admin.toString(); })
   };
 
-  ['id', 'name', 'createdAt', 'owner'].forEach(function(item) {
+  ['id', 'name', 'createdAt'].forEach(function(item) {
     resp[item] = this[item].toString();
   }.bind(this));
 
-  return resp;
+  this.populate('owner admins subscribers', function(e, cluster) {
+    resp.owner = cluster.owner.serialize();
+    resp.admins = cluster.admins.map(function(a) { return a.serialize(); });
+    resp.subscribers = cluster.subscribers.map(function(s) { return s.serialize(); });
+    callback(resp);
+  });
 };
 
 clusterSchema.methods.saveAdmin = function(user, cb) {

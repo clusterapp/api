@@ -25,7 +25,7 @@ var createUserAndCluster = function(opts, cb) {
 };
 
 describe('user routes', function() {
-  describe('/clusters', function() {
+  describe.only('/clusters', function() {
     describe('/own', function() {
       it('lists the clusters the user owns', function(done) {
         createUserAndCluster({
@@ -38,6 +38,7 @@ describe('user routes', function() {
             json: function(d) {
               expect(d.length).to.eql(1);
               expect(d[0].name).to.eql('foo');
+              expect(d[0].owner.redditName).to.eql('jack');
               done();
             }
           });
@@ -58,6 +59,7 @@ describe('user routes', function() {
                 json: function(d) {
                   expect(d.length).to.eql(1);
                   expect(d[0].name).to.eql('foo');
+                  expect(d[0].admins[0].redditName).to.eql('ollie');
                   done();
                 }
               });
@@ -81,6 +83,7 @@ describe('user routes', function() {
                 json: function(d) {
                   expect(d.length).to.eql(1);
                   expect(d[0].name).to.eql('foo');
+                  expect(d[0].subscribers[0].redditName).to.eql('ollie');
                   done();
                 }
               });
