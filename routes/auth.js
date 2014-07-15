@@ -5,7 +5,7 @@ var crypto = require('crypto');
 var passport = require('passport');
 var _ = require('underscore');
 var User = require('../models/user_model');
-var ERRORS = require('./error_messages');
+var ERRORS = require('../lib/error_messages');
 
 var authRoutes = {
   '/reddit': {

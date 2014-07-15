@@ -3,7 +3,7 @@
 var express = require('express');
 var User = require('../models/user_model');
 
-var ERRORS = require('./error_messages');
+var ERRORS = require('../lib/error_messages');
 
 var validateParamsExist = require('./param_validator');
 

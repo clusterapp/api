@@ -1,4 +1,4 @@
-var ERRORS = require('./error_messages');
+var ERRORS = require('../lib/error_messages');
 var async = require('async');
 var User = require('../models/user_model');
 
