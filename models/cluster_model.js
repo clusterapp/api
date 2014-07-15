@@ -18,10 +18,9 @@ var nameValidator = function(value, done) {
     // if we get here that means this user/name combo does
     // not exist, so we have to go and make sure the chosen name
     // is valid
-    User.findById(this.owner, function(e, user) {
-      Cluster.clusterNameIsUnique(user, value, function(res) {
-        return done(res);
-      });
+    Cluster.find({ owner: this.owner }, function(e, clusters) {
+      var names = clusters.map(function(c) { return c.name; });
+      return done(!(names.indexOf(value) > -1));
     });
   }.bind(this));
 };
@@ -81,15 +80,6 @@ clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
     if(cluster.owner && cluster.owner.toString() === userId) return cb(true, cluster);
     if(cluster.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1) return cb(true, cluster);
     return cb(false);
-  });
-};
-
-clusterSchema.statics.clusterNameIsUnique = function(user, clusterName, cb) {
-  Cluster.find({
-    owner: user.id,
-    name: new RegExp('^' + clusterName + '$', 'i')
-  }, function(e, clusters) {
-    cb(clusters.length === 0);
   });
 };
 
