@@ -5,7 +5,7 @@ var _ = require('underscore');
 var RedditWrapper = require('reddit-wrapper');
 
 var wrap = new RedditWrapper({});
-var validateParamsExist = require('./param_validator');
+var validateParamsExist = require('../lib/param_validator');
 
 var redditRoutes = {
   '/popular': {
