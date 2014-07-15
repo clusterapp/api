@@ -56,7 +56,7 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 Destroys the token on the user, so any further requests with that token will fail.
 
-#### GET `/users/owner?token=TOKEN&userId=USER_ID`
+#### GET `/users/clusters/own?token=TOKEN&userId=USER_ID`
 
 Returns an array of clusters, each being one the user created.
 ```json
@@ -72,7 +72,7 @@ Returns an array of clusters, each being one the user created.
 }, {...}]
 ```
 
-#### GET `/users/admin?token=TOKEN&userId=USER_ID`
+#### GET `/users/clusters/admin?token=TOKEN&userId=USER_ID`
 
 Returns an array of clusters, each being one the user is an admin of.
 
@@ -89,7 +89,7 @@ Returns an array of clusters, each being one the user is an admin of.
 }, {...}]
 ```
 
-#### GET `/users/subscribers?token=TOKEN&userId=USER_ID`
+#### GET `/users/clusters/subscribed?token=TOKEN&userId=USER_ID`
 
 Returns an array of clusters, each being one the user is subscribed to.
 

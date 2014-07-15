@@ -67,7 +67,7 @@ describe('user routes', function() {
       });
     });
 
-    describe('/subscriber', function() {
+    describe('/subscribed', function() {
       it('lists the clusters the user has subscribed to', function(done) {
         createUserAndCluster({
           user: { redditName: 'jack' },
@@ -75,7 +75,7 @@ describe('user routes', function() {
         }, function(user, cluster) {
           User.createWithToken({ redditName: 'ollie' }, function(e, ollie) {
             cluster.saveSubscriber(ollie, function(e, cluster) {
-              callRoute('/clusters/subscriber', {
+              callRoute('/clusters/subscribed', {
                 query: { userId: ollie.id, token: ollie.token }
               }, {
                 json: function(d) {

@@ -112,7 +112,7 @@ var userRoutes = {
       });
     }
   },
-  '/clusters/subscriber': {
+  '/clusters/subscribed': {
     method: 'get',
     fn: function(req, res) {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
