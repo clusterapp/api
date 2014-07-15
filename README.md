@@ -28,6 +28,18 @@ Given the user's reddit id and a token (given back to you in the authentication 
 }
 ```
 
+#### GET `/users/name?name=REDDIT_NAME`
+
+Given the user's name, will give you back the user.
+
+```json
+{
+    "id": "abc1234",
+    "lastActive": "Thu Jul 10 2014",
+    "redditName": "mega_troll"
+}
+```
+
 #### POST `/users/updateLastActive?token=TOKEN&userId=USER_ID`
 
 Updates the `lastActive` field on the user and returns the serialized user object.

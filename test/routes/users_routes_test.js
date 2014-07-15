@@ -196,5 +196,20 @@ describe('user routes', function() {
 
   });
 
+  describe('/name', function() {
+    it('returns the user if they exist', function(done) {
+      User.createWithToken({ redditName: 'foo' }, function(e, user) {
+        callRoute('/name', {
+          query: { name: 'foo' }
+        }, {
+          json: function(d) {
+            expect(d.id).to.eql(user.id);
+            expect(d.redditName).to.eql('foo');
+            done();
+          }
+        });
+      });
+    });
+  });
 });
 

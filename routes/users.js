@@ -44,6 +44,19 @@ var userRoutes = {
       });
     }
   },
+  '/name': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['name'], req, res, function(valid) {
+        if(!valid) return;
+
+        User.findOne({ redditName: req.query.name }, function(e, user) {
+          if(e) return res.json({ errors: [ e.message ] });
+          return res.json(user.serialize());
+        });
+      });
+    }
+  },
   '/updateLastActive': {
     method: 'post',
     fn: function(req, res) {
