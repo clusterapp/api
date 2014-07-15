@@ -58,6 +58,14 @@ clusterSchema.methods.saveAdmin = function(user, cb) {
   this.save(cb);
 };
 
+clusterSchema.methods.saveSubscriber = function(user, cb) {
+  if(user._id === this.owner || this.admins.indexOf(user._id) > -1) {
+    return cb(null, this);
+  }
+  this.subscribers.push(user._id);
+  this.save(cb);
+};
+
 clusterSchema.methods.userIdCanEdit = function(userId) {
   return (this.owner.toString() === userId ||
           this.admins.map(function(a) { return a.toString(); }).indexOf(userId) > -1);
@@ -76,7 +84,11 @@ clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
 };
 
 clusterSchema.statics.clustersForUser = function(user, cb) {
-  Cluster.find({ owner: user._id }, function(e, clusters) {
+  return Cluster.clustersForUserId(user._id, cb);
+};
+
+clusterSchema.statics.clustersForUserId = function(userId, cb) {
+  Cluster.find({ owner: userId }, function(e, clusters) {
     if(e) return cb(e);
     cb(null, clusters.map(function(c) { return c.serialize() }));
   });

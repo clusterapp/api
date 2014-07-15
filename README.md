@@ -44,6 +44,56 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 Destroys the token on the user, so any further requests with that token will fail.
 
+#### GET `/users/owner?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user created.
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
+#### GET `/users/admin?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user is an admin of.
+
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
+#### GET `/users/subscribers?token=TOKEN&userId=USER_ID`
+
+Returns an array of clusters, each being one the user is subscribed to.
+
+```json
+[{
+  "id": "abc1234",
+  "name": "foo",
+  "createdAt": "Thu Jul 10 2014",
+  "owner": "abc65755757",
+  "public": "true",
+  "subreddits": ["vim", "code"],
+  "admins": ["CDE123"],
+  "subscribers": ["FEGE142"]
+}, {...}]
+```
+
 ## Clusters
 
 #### GET `/clusters/?clusterId=CLUSTER_ID&token=USER_TOKEN`
