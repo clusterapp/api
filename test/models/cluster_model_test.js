@@ -18,7 +18,7 @@ var twoUsers = function(done) {
   });
 };
 
-describe.only('Cluster model', function() {
+describe('Cluster model', function() {
   it('has an owner', function(done) {
     new User({ redditName: 'jack' }).save(function(e, user) {
       new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
