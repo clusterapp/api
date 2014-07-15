@@ -2,6 +2,7 @@
 
 var express = require('express');
 var User = require('../models/user_model');
+var Cluster = require('../models/cluster_model');
 
 var ERRORS = require('./error_messages');
 
@@ -70,6 +71,17 @@ var userRoutes = {
           user.save(function(e, user) {
             res.json({ success: 'token destroyed' });
           });
+        });
+      });
+    }
+  },
+  '/clusters/own': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        Cluster.clustersForUserId(req.query.userId, function(e, clusters) {
+          res.json(clusters);
         });
       });
     }

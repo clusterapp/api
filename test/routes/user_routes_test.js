@@ -5,6 +5,7 @@ var userRoutes = require('../../routes/users').endpoints;
 var expectRouteResponse = require('../test_routes_response')(userRoutes);
 
 var User = require('../../models/user_model');
+var Cluster = require('../../models/cluster_model');
 
 require('../test_db_config');
 
@@ -14,7 +15,37 @@ var callRoute = function(route, req, res) {
   userRoutes[route].fn(req, res);
 };
 
+var createUserAndCluster = function(opts, cb) {
+  User.createWithToken(opts.user, function(e, user) {
+    opts.cluster.owner = user;
+    new Cluster(opts.cluster).save(function(e, cluster) {
+      cb(user, cluster);
+    });
+  });
+};
+
 describe('user routes', function() {
+  describe('/clusters', function() {
+    describe('/own', function() {
+      it('lists the clusters the user owns', function(done) {
+        createUserAndCluster({
+          user: { redditName: 'jack' },
+          cluster: { name: 'foo' }
+        }, function(user, cluster) {
+          callRoute('/clusters/own', {
+            query: { userId: user.id, token: user.token }
+          }, {
+            json: function(d) {
+              expect(d.length).to.eql(1);
+              expect(d[0].name).to.eql('foo');
+              done();
+            }
+          });
+        });
+      });
+    });
+  });
+
   describe('/destroyToken', function() {
     it('destroys the user token', function(done) {
       User.createWithToken({ redditName: 'foo' }, function(e, user) {
