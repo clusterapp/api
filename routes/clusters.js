@@ -57,6 +57,24 @@ var clusterRoutes = {
       });
     }
   },
+  '/name': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['clusterRoute'], req, res, function(valid) {
+        if(!valid) return;
+        var parts = req.query.clusterRoute.split('/').filter(function(item) { return item !== ''; });
+        var userName = parts[0];
+        var clusterName = parts[1];
+        User.findOne({ redditName: userName }, function(e, user) {
+          Cluster.findOne({ owner: user, name: clusterName }, function(e, cluster) {
+            Cluster.userHasPermission(req.query.userId, cluster.id, function(hasPermission, cluster) {
+              res.json(hasPermission ? cluster.serialize() : ERRORS.NO_CLUSTER_FOUND());
+            });
+          });
+        });
+      });
+    }
+  },
   '/listing': {
     method: 'get',
     fn: function(req, res) {
