@@ -1,6 +1,6 @@
 var expect = require('expect.js');
 
-var validateParamsExist = require('../../routes/param_validator');
+var validateParamsExist = require('../../lib/param_validator');
 var User = require('../../models/user_model');
 
 describe('param validator', function() {

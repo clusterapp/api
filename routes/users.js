@@ -5,7 +5,7 @@ var User = require('../models/user_model');
 
 var ERRORS = require('../lib/error_messages');
 
-var validateParamsExist = require('./param_validator');
+var validateParamsExist = require('../lib/param_validator');
 
 var validateParams = function(req, res, cb) {
   if(!req.query || !req.query.id) {

@@ -1,10 +1,12 @@
 var mongoose = require('mongoose');
 var db = require('../database');
 var User = require('./user_model');
+console.log(User);
 
 var Schema = mongoose.Schema;
 
 var nameValidator = function(value, done) {
+  console.log(User);
   Cluster.findOne({ name: value, owner: this.owner }, function(e, cluster) {
     // if a cluster exists with this name and the same owner
     // and the IDs match, that means it's this one

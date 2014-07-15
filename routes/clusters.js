@@ -6,7 +6,7 @@ var ERRORS = require('../lib/error_messages');
 var User = require('../models/user_model');
 var Cluster = require('../models/cluster_model');
 var ListingCache = require('../models/listing_cache_model');
-var validateParamsExist = require('./param_validator');
+var validateParamsExist = require('../lib/param_validator');
 var Listing = require('./listing');
 
 ERRORS.NO_CLUSTER_FOUND = function() {

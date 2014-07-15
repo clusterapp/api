@@ -58,7 +58,7 @@ userSchema.statics.tokenIsValid = function(id, token, cb) {
   });
 };
 
-var User = mongoose.model('User', userSchema)
+var User = mongoose.model('User', userSchema);
 
 module.exports = User;
 
