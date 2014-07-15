@@ -3,31 +3,75 @@ var mock = require('./mock_reddit_api.js');
 var Listing = require('../../routes/listing');
 var ApiCache = require('../../models/api_cache_model.js');
 var nock = require('nock');
+var timekeeper = require('timekeeper');
 
 require('../shorter_stack_traces');
 require('../test_db_config');
 
 describe('listings', function() {
   //TODO: write more caching tests about expiry, etc
-  describe('api endpoints', function() {
-    it('has the endpoints cached', function(done) {
-      var vimMock = mock('/r/vim/hot.json');
-      var angularjsMock = mock('/r/angularjs/hot.json');
-      var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+  describe.only('api endpoints', function() {
+    describe('caching', function() {
+      afterEach(nock.cleanAll);
+      it('uses the cache if it exists', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
 
-      new ApiCache({ url: 'http://www.reddit.com/r/vim/hot.json', data: {
-        data: {
-          children: []
-        }
-      } }).save(function(e, cache) {
-        listing.get({}, function() {
-          expect(vimMock.isDone()).to.eql(false);
-          expect(angularjsMock.isDone()).to.eql(true);
-          nock.cleanAll();
-          done();
+        new ApiCache({
+          url: 'http://www.reddit.com/r/vim/hot.json',
+          data: {
+            data: { children: [] }
+          }
+        }).save(function(e, cache) {
+          listing.get({}, function() {
+            expect(vimMock.isDone()).to.eql(false);
+            expect(angularjsMock.isDone()).to.eql(true);
+            done();
+          });
         });
       });
 
+      it('creates a cache if non exist', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+        listing.get({}, function() {
+          expect(vimMock.isDone()).to.eql(true);
+          expect(angularjsMock.isDone()).to.eql(true);
+          ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json' }, function(e, cache) {
+            expect(cache).to.be.ok();
+            done();
+          });
+        });
+      });
+
+      it('creates a new cache if it has expired', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+
+        new ApiCache({
+          url: 'http://www.reddit.com/r/vim/hot.json',
+          data: {
+            data: { children: [] }
+          }
+        }).save(function(e, cache) {
+          var now = new Date(Date.now());
+          var twoHoursLater = now.setHours(now.getHours() + 2);
+          timekeeper.freeze(twoHoursLater); // Travel to that date.
+
+          listing.get({}, function() {
+            expect(vimMock.isDone()).to.eql(true);
+            expect(angularjsMock.isDone()).to.eql(true);
+            ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json' }, function(e, cache) {
+              expect(new Date(cache.date)).to.eql(new Date(twoHoursLater));
+              timekeeper.reset();
+              done();
+            });
+          });
+        });
+      });
     });
 
     it('uses the after parameters if passed', function(done) {
