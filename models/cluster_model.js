@@ -100,14 +100,10 @@ clusterSchema.statics.userHasPermission = function(userId, clusterId, cb) {
   });
 };
 
-clusterSchema.statics.clustersForUser = function(user, cb) {
-  return Cluster.clustersForUserId(user._id, cb);
-};
-
 clusterSchema.statics.clustersForUserId = function(userId, cb) {
   Cluster.find({ owner: userId }, function(e, clusters) {
     if(e) return cb(e);
-    cb(null, clusters.map(function(c) { return c.serialize() }));
+    cb(null, clusters);
   });
 };
 

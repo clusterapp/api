@@ -31,9 +31,19 @@ describe('Cluster model', function() {
   describe('#serialize', function() {
     it('only has the expected keys', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
-        var cluster = new Cluster({ name: 'code', owner: user }).serialize();
-        expect(Object.keys(cluster)).to.eql('public subreddits admins subscribers id name createdAt owner'.split(' '));
-        done();
+        var cluster = new Cluster({ name: 'code', owner: user }).serialize(function(cluster) {
+          expect(Object.keys(cluster)).to.eql('public subreddits admins subscribers id name createdAt owner'.split(' '));
+          done();
+        });
+      });
+    });
+
+    it('populates the owner field', function(done) {
+      new User({ redditName: 'jack' }).save(function(e, user) {
+        var cluster = new Cluster({ name: 'code', owner: user }).serialize(function(cluster) {
+          expect(cluster.owner.redditName).to.eql('jack');
+          done();
+        });
       });
     });
   });
@@ -218,9 +228,11 @@ describe('Cluster model', function() {
         async.each(['foo', 'bar'], function(name, cb) {
           new Cluster({ name: name, owner: user }).save(cb);
         }, function(e) {
-          Cluster.clustersForUser(user, function(e, clusters) {
-            expect(clusters.map(function(c) { return c.name; }))
-            .to.eql(['foo', 'bar']);
+          Cluster.clustersForUserId(user.id, function(e, clusters) {
+            var names = clusters.map(function(c) { return c.name; });
+            expect(names).to.contain('foo');
+            expect(names).to.contain('bar');
+            expect(names.length).to.eql(2);
             done();
           });
         });

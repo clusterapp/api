@@ -96,7 +96,7 @@ var userRoutes = {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
         Cluster.find({ owner: req.query.userId }, function(e, clusters) {
-          Cluster.serializeList(clusters, res.json);
+          Cluster.serializeList(clusters, res.json.bind(res));
         });
       });
     }
@@ -109,7 +109,7 @@ var userRoutes = {
         Cluster.find({
           admins: { $in: [req.query.userId] }
         }, function(e, clusters) {
-          Cluster.serializeList(clusters, res.json);
+          Cluster.serializeList(clusters, res.json.bind(res));
         })
       });
     }
@@ -122,7 +122,7 @@ var userRoutes = {
         Cluster.find({
           subscribers: { $in: [req.query.userId] }
         }, function(e, clusters) {
-          Cluster.serializeList(clusters, res.json);
+          Cluster.serializeList(clusters, res.json.bind(res));
         })
       });
     }

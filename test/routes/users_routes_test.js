@@ -25,7 +25,7 @@ var createUserAndCluster = function(opts, cb) {
 };
 
 describe('user routes', function() {
-  describe.only('/clusters', function() {
+  describe('/clusters', function() {
     describe('/own', function() {
       it('lists the clusters the user owns', function(done) {
         createUserAndCluster({
