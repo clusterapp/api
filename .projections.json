@@ -1,5 +1,5 @@
 {
-  "routes/*.rb": {
+  "routes/*.js": {
     "alternate": "test/routes/{}_routes_test.js",
     "type": "source"
   },
