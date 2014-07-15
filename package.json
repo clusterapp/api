@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha test --recursive",
-    "watch": "node bin/test"
+    "seed": "NODE_ENV=development node seed.js"
   },
   "dependencies": {
     "async": "^0.9.0",
