@@ -14,6 +14,7 @@ var redditRoutes = {
       validateParamsExist(['userId', 'token'], req, res, function(valid) {
         if(!valid) return;
         wrap.subreddits({ limit: req.query.limit }, function(e, r, resp) {
+          console.log(resp);
           res.json(resp.data.children.map(function(item) {
             return item.data;
           }));
