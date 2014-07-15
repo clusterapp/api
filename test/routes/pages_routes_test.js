@@ -11,7 +11,7 @@ var callRoute = function(route, req, res) {
   pageRoutes[route].fn(req, res);
 };
 
-describe.only('page routes', function() {
+describe('page routes', function() {
   describe('/index', function() {
     it('merges multiple calls into one', function(done) {
       User.createWithToken({ redditName: 'jack' }, function(e, user) {
