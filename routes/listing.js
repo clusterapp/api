@@ -1,9 +1,34 @@
 var RedditWrapper = require('reddit-wrapper');
 var async = require('async');
+var ApiCache = require('../models/api_cache_model.js');
+var request = require('request');
+
+
+var cacheFn = function(options) {
+  ApiCache.findOne({ url: options.url }, function(e, cache) {
+    if(cache && cache.notExpired()) return options.callback(null, null, cache.data);
+
+    request(options.request, function(err, resp, body) {
+      if(err) throw(err);
+      var jsonBody = JSON.parse(body);
+
+      if(cache) {
+        ApiCache.update({ url: options.url }, { date: Date.now(), data: jsonBody }, function() {
+          options.callback(err, resp, jsonBody);
+        });
+      } else {
+        new ApiCache({ url: options.url, data: jsonBody }).save(function(e, cache) {
+          options.callback(err, resp, jsonBody);
+        });
+      }
+    });
+  });
+};
 
 var Listing = function(cluster) {
   this.wrap = new RedditWrapper({
-    parseJson: true
+    cache: true,
+    cacheFn: cacheFn
   });
   this.cluster = cluster;
 };

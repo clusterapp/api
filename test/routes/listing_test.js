@@ -1,9 +1,78 @@
 var expect = require('expect.js');
 var mock = require('./mock_reddit_api.js');
 var Listing = require('../../routes/listing');
+var ApiCache = require('../../models/api_cache_model.js');
+var nock = require('nock');
+var timekeeper = require('timekeeper');
+
+require('../shorter_stack_traces');
+require('../test_db_config');
 
 describe('listings', function() {
   describe('api endpoints', function() {
+    describe('caching', function() {
+      afterEach(nock.cleanAll);
+      it('uses the cache if it exists', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+
+        new ApiCache({
+          url: 'http://www.reddit.com/r/vim/hot.json',
+          data: {
+            data: { children: [] }
+          }
+        }).save(function(e, cache) {
+          listing.get({}, function() {
+            expect(vimMock.isDone()).to.eql(false);
+            expect(angularjsMock.isDone()).to.eql(true);
+            done();
+          });
+        });
+      });
+
+      it('creates a cache if non exist', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+        listing.get({}, function() {
+          expect(vimMock.isDone()).to.eql(true);
+          expect(angularjsMock.isDone()).to.eql(true);
+          ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json' }, function(e, cache) {
+            expect(cache).to.be.ok();
+            done();
+          });
+        });
+      });
+
+      it('creates a new cache if it has expired', function(done) {
+        var vimMock = mock('/r/vim/hot.json');
+        var angularjsMock = mock('/r/angularjs/hot.json');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+
+        new ApiCache({
+          url: 'http://www.reddit.com/r/vim/hot.json',
+          data: {
+            data: { children: [] }
+          }
+        }).save(function(e, cache) {
+          var now = new Date(Date.now());
+          var twoHoursLater = now.setHours(now.getHours() + 2);
+          timekeeper.freeze(twoHoursLater); // Travel to that date.
+
+          listing.get({}, function() {
+            expect(vimMock.isDone()).to.eql(true);
+            expect(angularjsMock.isDone()).to.eql(true);
+            ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json' }, function(e, cache) {
+              expect(new Date(cache.date)).to.eql(new Date(twoHoursLater));
+              timekeeper.reset();
+              done();
+            });
+          });
+        });
+      });
+    });
+
     it('uses the after parameters if passed', function(done) {
       var vimMock = mock('/r/vim/hot.json?after=foo');
       var angularjsMock = mock('/r/angularjs/hot.json?after=bar');
@@ -58,9 +127,9 @@ describe('listings', function() {
     it('returns the raw json for each subreddit', function(done) {
       listing.get({}, function(e, data) {
         expect(data.vim.data.children[0].data.title)
-          .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
+        .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
         expect(data.angularjs.data.children[0].data.title)
-          .to.eql("Angular\u2019s dependency injection annotation process");
+        .to.eql("Angular\u2019s dependency injection annotation process");
         done();
       });
     });
@@ -70,10 +139,10 @@ describe('listings', function() {
         var result = data.sorted;
         expect(result[0].title).to.eql("Angular\u2019s dependency injection annotation process");
         expect(result[1].title)
-          .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
+        .to.eql("How can I remap ESC to Ctrl-C and navigation keys to JKL; ?");
         expect(result[2].title).to.eql("12 Vim Tips");
         expect(result[3].title)
-          .to.eql("Using Scope.$watch() To Watch Functions In AngularJS");
+        .to.eql("Using Scope.$watch() To Watch Functions In AngularJS");
         done();
       });
     });
