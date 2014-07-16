@@ -28,6 +28,20 @@ describe('Cluster model', function() {
     });
   });
 
+  describe('.serializeList', function() {
+    it('calls serialize on each cluster', function(done) {
+       new User({ redditName: 'jack' }).save(function(e, user) {
+        var cluster = new Cluster({ name: 'code', owner: user });
+        Cluster.serializeList([cluster], function(resp) {
+          cluster.serialize(function(cluster) {
+            expect(resp[0]).to.eql(cluster);
+            done();
+          });
+        });
+      });
+    });
+  });
+
   describe('#serialize', function() {
     it('only has the expected keys', function(done) {
       new User({ redditName: 'jack' }).save(function(e, user) {
