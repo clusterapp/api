@@ -422,12 +422,11 @@ describe('cluster routes', function() {
           }, {
             json: function(d) {
               var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
-              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'},
-                                   function(e, cache) {
-                                     expect(cache).to.be.ok();
-                                     expect(cache.data.sorted.length).to.be(5);
-                                     done();
-                                   });
+              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'}, function(e, cache) {
+               expect(cache).to.be.ok();
+               expect(cache.data.sorted.length).to.be(5);
+               done();
+             });
             }
           });
         });
