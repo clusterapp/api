@@ -31,6 +31,7 @@
     "nock": "^0.42.1",
     "proxyquire": "1.0.1",
     "request": "2.37.0",
+    "sinon": "^1.10.3",
     "supertest": "0.13.0",
     "timekeeper": "0.0.4"
   }

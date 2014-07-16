@@ -7,6 +7,10 @@ var User = require('../../models/user_model');
 var Cluster = require('../../models/cluster_model');
 var ListingCache = require('../../models/listing_cache_model');
 var nock = require('nock');
+var sinon = require('sinon');
+
+
+var Double = require('doubler');
 
 
 require('../test_db_config');
@@ -19,6 +23,27 @@ var callRoute = function(route, req, res) {
 };
 
 describe('cluster routes', function() {
+
+  describe('/public', function() {
+    it('returns all public clusters', function(done) {
+      var cluster = new Double({ serialize: function(c) { c({ public: true, name: 'foo' }) } });
+
+      var stub = sinon.stub(Cluster, 'find', function(q, cb) {
+        if(q.public != true) throw new Error();
+        return cb(null, [cluster]);
+      });
+
+      callRoute('/public', {}, {
+        json: function(d) {
+          expect(d.length).to.eql(1);
+          Cluster.find.restore();
+          done();
+        }
+      });
+    });
+  });
+
+
   describe('/create', function() {
     it('creates a cluster', function(done) {
       User.createWithToken({ redditName: 'jack' }, function(e, user) {

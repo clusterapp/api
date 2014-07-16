@@ -84,6 +84,18 @@ var clusterRoutes = {
       });
     }
   },
+  '/public': {
+    method: 'get',
+    fn: function(req, res) {
+      Cluster.find({ public: true }, function(e, clusters) {
+        if(clusters) {
+          Cluster.serializeList(clusters, res.json.bind(res));
+        } else {
+          res.json(ERRORS.NO_CLUSTER_FOUND());
+        }
+      });
+    }
+  },
   '/listing': {
     method: 'get',
     fn: function(req, res) {
