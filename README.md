@@ -95,6 +95,10 @@ Returns an array of clusters, each being one the user is subscribed to.
 
 ## Clusters
 
+#### GET `/clusters/public`
+
+Returns an array of all public clusters on the site.
+
 #### GET `/clusters/?clusterId=CLUSTER_ID`
 
 Given a cluster id, will return a serialized object representing the cluster:
