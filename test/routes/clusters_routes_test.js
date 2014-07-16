@@ -54,6 +54,32 @@ describe('cluster routes', function() {
   });
 
   describe('/name', function() {
+    it('gives an error if the cluster does not exist', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        callRoute('/name', {
+          query: { clusterRoute: 'jack/foo', userId: user.id, token: user.token }
+        }, {
+          json: function(d) {
+            expect(d).to.eql({ errors: ['no cluster found'] });
+            done();
+          }
+        });
+      });
+    });
+
+    it('gives an error if the user/cluster combo does not exist', function(done) {
+      User.createWithToken({ redditName: 'jack' }, function(e, user) {
+        callRoute('/name', {
+          query: { clusterRoute: 'bob/foo', userId: user.id, token: user.token }
+        }, {
+          json: function(d) {
+            expect(d).to.eql({ errors: ['no cluster found'] });
+            done();
+          }
+        });
+      });
+    });
+
     it('errors if given a token and a user id that do not match', function(done) {
       User.createWithToken({ redditName: 'jack' }, function(e, user) {
         new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
@@ -396,12 +422,11 @@ describe('cluster routes', function() {
           }, {
             json: function(d) {
               var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
-              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'},
-                                   function(e, cache) {
-                expect(cache).to.be.ok();
-                expect(cache.data.sorted.length).to.be(5);
-                done();
-              });
+              ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'}, function(e, cache) {
+               expect(cache).to.be.ok();
+               expect(cache.data.sorted.length).to.be(5);
+               done();
+             });
             }
           });
         });

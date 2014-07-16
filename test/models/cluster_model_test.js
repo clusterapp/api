@@ -2,6 +2,7 @@ var Cluster = require('../../models/cluster_model');
 var User = require('../../models/user_model');
 var expect = require('expect.js');
 var async = require('async');
+var Double = require('doubler');
 
 require('../test_db_config');
 require('../shorter_stack_traces');
@@ -24,6 +25,18 @@ describe('Cluster model', function() {
       new Cluster({ name: 'foo', owner: user }).save(function(e, cluster) {
         expect(cluster.owner).to.eql(user._id);
         done();
+      });
+    });
+  });
+
+  describe('.serializeList', function() {
+    it('calls serialize on each cluster', function(done) {
+       new User({ redditName: 'jack' }).save(function(e, user) {
+        var cluster = new Double({ serialize: function(cb) { cb(); } });
+        Cluster.serializeList([cluster], function(resp) {
+          expect(cluster.serialize.called).to.eql(true);
+          done();
+        });
       });
     });
   });
