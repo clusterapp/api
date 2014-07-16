@@ -71,7 +71,6 @@ var clusterRoutes = {
         var clusterName = parts[1];
         User.findOne({ redditName: userName }, function(e, user) {
           Cluster.findOne({ owner: user, name: clusterName }, function(e, cluster) {
-            //TODO: this crashes if we don't have a cluster
             if(!cluster) return res.json(ERRORS.NO_CLUSTER_FOUND());
             Cluster.userHasPermission(req.query.userId, cluster.id, function(hasPermission, cluster) {
               if(hasPermission) {
