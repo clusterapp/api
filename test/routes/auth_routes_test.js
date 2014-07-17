@@ -49,7 +49,7 @@ describe('auth routes', function() {
       var req = { session: { redirect: 'f', state: 'b' }, user: { name: 'jack' } };
       callRoute('/reddit/success', req, {
         redirect: function(loc) {
-          expect(loc).to.match(/f\?user_id=.+&user_name=jack&token=.+/);
+          expect(loc).to.match(/f\?user_id=.+&user_name=jack&token=.+&last_active=.+/);
           done();
         }
       });
