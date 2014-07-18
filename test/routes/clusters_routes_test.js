@@ -388,6 +388,61 @@ describe('cluster routes', function() {
   });
 
   describe('/listing', function() {
+    afterEach(nock.cleanAll);
+    it('allows the first page to be accessed without a token if cluster is public', function(done) {
+      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', public: true, subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: { clusterId: cluster.id, SKIP_CACHE: true },
+        }, {
+          json: function(d) {
+            expect(d.sorted.length).to.be(10);
+            done();
+          }
+        });
+      });
+    });
+
+    it('does not give the after params for a public, non authed listing', function(done) {
+      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', public: true, subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: { clusterId: cluster.id, SKIP_CACHE: true },
+        }, {
+          json: function(d) {
+            expect(d.after).to.eql({});
+            done();
+          }
+        });
+      });
+    });
+
+    it('does not allow the first page to be accessed without a token if cluster is private', function(done) {
+      mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
+      mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', public: false, subreddits: ['vim', 'angularjs'] }
+      }, function(user, cluster) {
+        callRoute('/listing', {
+          query: { clusterId: cluster.id, SKIP_CACHE: true },
+        }, {
+          json: function(d) {
+            expect(d).to.eql({ errors: ['no cluster found'] });
+            done();
+          }
+        });
+      });
+    });
+
     it('returns the data for a valid request', function(done) {
       mock.withFile('/r/angularjs/hot.json', 'test/routes/fixtures/angularjs_hot.json');
       mock.withFile('/r/vim/hot.json', 'test/routes/fixtures/vim_hot.json');
