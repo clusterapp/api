@@ -100,7 +100,7 @@ var clusterRoutes = {
     method: 'get',
     fn: function(req, res) {
 
-      validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
+      validateParamsExist(['clusterId'], req, res, function(valid) {
         if(!valid) return;
 
         var fullUrl;
@@ -112,6 +112,9 @@ var clusterRoutes = {
           if(!hasPermission) return res.json(ERRORS.NO_CLUSTER_FOUND());
 
           var listingFromCache = function(listing, fromCache) {
+            if(!req.query.userId) {
+              listing.after = {};
+            }
             return _.extend(listing, { fromCache: fromCache });
           };
 

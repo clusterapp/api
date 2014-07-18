@@ -149,6 +149,8 @@ Returns a listing for the given cluster ID, as long as the user is able to view 
 
 These requests are cached on an hourly basis. If you really want the non cached version, you can pass `SKIP_CACHE=true` as a parameter in the URL. The response will have a `fromCache` key set to true or false to tell you if the request came from a cache or not.
 
+If you don't pass a userid or token, and the cluster is public, you will see the first page of results, but nothing more. No pagination parameters will be passed.
+
 #### POST `/clusters/update?userId=USER_ID&token=USER_TOKEN&clusterId=CLUSTER_ID`
 
 Given a JSON body of key value pairs, will update the cluster with the properties given. Returns the new cluster.
