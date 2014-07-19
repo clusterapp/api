@@ -21,3 +21,6 @@ after(function(done) {
 beforeEach(function(done) {
   tidyUp(done);
 });
+afterEach(function(done) {
+  tidyUp(done);
+});

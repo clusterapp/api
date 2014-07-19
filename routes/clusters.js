@@ -25,11 +25,10 @@ var formatValidationErrors = function(e) {
 
 var writeCacheAndGetListing = function(opts, cb) {
   var cluster = opts.cluster;
-  var after = opts.req.query.after;
   var fullUrl = opts.fullUrl;
   var cache = opts.cache;
 
-  new Listing(cluster).get({ after: after }, function(e, listing) {
+  new Listing(cluster).get({ query: opts.req.query}, function(e, listing) {
     if(cache) {
       ListingCache.update({ url: fullUrl }, {
         date: Date.now(), data: listing
@@ -112,6 +111,7 @@ var clusterRoutes = {
           if(!hasPermission) return res.json(ERRORS.NO_CLUSTER_FOUND());
 
           var listingFromCache = function(listing, fromCache) {
+            // TODO: uncomment this
             if(!req.query.userId) {
               listing.after = {};
             }
@@ -119,7 +119,7 @@ var clusterRoutes = {
           };
 
           if(req.query.SKIP_CACHE) {
-            new Listing(cluster).get({ after: after }, function(e, listing) {
+            new Listing(cluster).get({ query: req.query }, function(e, listing) {
               return res.json(listingFromCache(listing, false));
             });
             return;

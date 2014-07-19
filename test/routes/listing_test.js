@@ -45,6 +45,17 @@ describe('listings', function() {
         });
       });
 
+      it('stores after params in the url', function(done) {
+        var vimMock = mock('/r/vim/hot.json?after=foo');
+        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+        listing.get({ query: { after_vim: 'foo' } }, function() {
+          ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json?after=foo' }, function(e, cache) {
+            expect(cache).to.be.ok();
+            done();
+          });
+        });
+      });
+
       it('creates a new cache if it has expired', function(done) {
         var vimMock = mock('/r/vim/hot.json');
         var angularjsMock = mock('/r/angularjs/hot.json');
@@ -78,7 +89,7 @@ describe('listings', function() {
       var angularjsMock = mock('/r/angularjs/hot.json?after=bar');
       var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
 
-      listing.get({ after: { vim: 'foo', angularjs: 'bar' } }, function() {
+      listing.get({ query: { after_vim: 'foo', after_angularjs: 'bar' } }, function() {
         expectMocksToBeCalled(vimMock, angularjsMock);
         done();
       });
@@ -89,7 +100,7 @@ describe('listings', function() {
       var angularjsMock = mock('/r/angularjs/hot.json');
       var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
 
-      listing.get({ after: { vim: 'foo' } }, function() {
+      listing.get({ query: { after_vim: 'foo' } }, function() {
         expectMocksToBeCalled(vimMock, angularjsMock);
         done();
       });
