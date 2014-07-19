@@ -5,7 +5,17 @@ var request = require('request');
 
 
 var cacheFn = function(options) {
-  ApiCache.findOne({ url: options.url }, function(e, cache) {
+  var queryString = "";
+  if(Object.keys(options.request.qs).length > 0) {
+    queryString += "?";
+    var params = [];
+    for(var key in options.request.qs) {
+      params.push(key + '=' + options.request.qs[key]);
+    }
+    queryString += params.join('&');
+  }
+  var cacheKey = options.request.url + queryString;
+  ApiCache.findOne({ url: cacheKey }, function(e, cache) {
     if(cache && cache.notExpired()) return options.callback(null, null, cache.data);
 
     request(options.request, function(err, resp, body) {
@@ -13,11 +23,11 @@ var cacheFn = function(options) {
       var jsonBody = JSON.parse(body);
 
       if(cache) {
-        ApiCache.update({ url: options.url }, { date: Date.now(), data: jsonBody }, function() {
+        ApiCache.update({ url: cacheKey }, { date: Date.now(), data: jsonBody }, function() {
           options.callback(err, resp, jsonBody);
         });
       } else {
-        new ApiCache({ url: options.url, data: jsonBody }).save(function(e, cache) {
+        new ApiCache({ url: cacheKey, data: jsonBody }).save(function(e, cache) {
           options.callback(err, resp, jsonBody);
         });
       }
@@ -27,6 +37,7 @@ var cacheFn = function(options) {
 
 var Listing = function(cluster) {
   this.wrap = new RedditWrapper({
+    //TODO: try to figure out why the caching doesn't work
     cache: true,
     cacheFn: cacheFn
   });
@@ -39,8 +50,8 @@ Listing.prototype.get = function(opts, cb) {
     var listingOpts = {
       subReddit: item
     }
-    if(opts.after && opts.after[item]) {
-      listingOpts.after = opts.after[item];
+    if(opts.query && opts.query['after_' + item]) {
+      listingOpts.after = opts.query['after_' + item];
     }
     this.wrap.listing(listingOpts, function(e, resp, body) {
       results[item] = body;
