@@ -47,7 +47,7 @@ describe('listings', function() {
 
       it('stores after params in the url', function(done) {
         var vimMock = mock('/r/vim/hot.json?after=foo');
-        var listing = new Listing({ subreddits: ['vim', 'angularjs'] });
+        var listing = new Listing({ subreddits: ['vim'] });
         listing.get({ query: { after_vim: 'foo' } }, function() {
           ApiCache.findOne({ url: 'http://www.reddit.com/r/vim/hot.json?after=foo' }, function(e, cache) {
             expect(cache).to.be.ok();
