@@ -46,6 +46,19 @@ var userRoutes = {
       });
     }
   },
+  '/id': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token', 'queryUserId'], req, res, function(valid) {
+        if(!valid) return;
+
+        User.findOne({ _id: req.query.queryUserId }, function(e, user) {
+          if(e) return res.json({ errors: [ e.message ] });
+          return res.json(user.serialize());
+        });
+      });
+    }
+  },
   '/name': {
     method: 'get',
     fn: function(req, res) {
