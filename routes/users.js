@@ -67,6 +67,7 @@ var userRoutes = {
 
         User.findOne({ redditName: req.query.name }, function(e, user) {
           if(e) return res.json({ errors: [ e.message ] });
+          if(!user) return res.json({ errors: ['no user found'] });
           return res.json(user.serialize());
         });
       });
