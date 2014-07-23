@@ -213,7 +213,7 @@ describe('user routes', function() {
     });
   };
 
-  describe.only('/id', function() {
+  describe('/id', function() {
     it('gets a user by their id', function(done) {
       twoUsers(function(u1, u2) {
         callRoute('/id', {
