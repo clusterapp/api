@@ -15,6 +15,8 @@ var callRoute = function(route, req, res) {
   userRoutes[route].fn(req, res);
 };
 
+var async = require('async');
+
 var createUserAndCluster = function(opts, cb) {
   User.createWithToken(opts.user, function(e, user) {
     opts.cluster.owner = user;
@@ -197,6 +199,33 @@ describe('user routes', function() {
       });
     });
 
+  });
+
+  var twoUsers = function(done) {
+    var users = [];
+    async.each(['jack', 'ollie'], function(name, cb) {
+      User.createWithToken({ redditName: name }, function(e, user) {
+        users.push(user);
+        cb();
+      });
+    }, function() {
+      done(users[0], users[1]);
+    });
+  };
+
+  describe('/id', function() {
+    it('gets a user by their id', function(done) {
+      twoUsers(function(u1, u2) {
+        callRoute('/id', {
+          query: { userId: u1.id, token: u1.token, queryUserId: u2.id }
+        }, {
+          json: function(d) {
+            expect(d.id).to.eql(u2.id);
+            done();
+          }
+        });
+      });
+    });
   });
 
   describe('/name', function() {

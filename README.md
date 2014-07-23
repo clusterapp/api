@@ -28,6 +28,18 @@ Given the user's reddit id and a token (given back to you in the authentication 
 }
 ```
 
+####  GET `/users/id?token=TOKEN&userId=USER_ID&queryUserId=QUERY_USER_ID`
+
+Given the user's reddit id and a token (given back to you in the authentication process), along with another user id, this will return you the user information for that query id.
+
+```json
+{
+    "id": "abc1234",
+    "lastActive": "Thu Jul 10 2014",
+    "redditName": "mega_troll"
+}
+```
+
 #### GET `/users/name?name=REDDIT_NAME`
 
 Given the user's name, will give you back the user.
