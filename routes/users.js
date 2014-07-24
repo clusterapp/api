@@ -91,6 +91,18 @@ var userRoutes = {
       });
     }
   },
+  '/all_names': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token'], req, res, function(valid) {
+        if(!valid) return;
+        User.find({}, function(e, users) {
+          if(e || !users) return res.json({ errors: ['no users found'] });
+          res.json(users.map(function(u) { return u.redditName; }));
+        });
+      });
+    }
+  },
   '/destroyToken': {
     method: 'post',
     fn: function(req, res) {

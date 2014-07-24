@@ -68,6 +68,15 @@ Updates the `lastActive` field on the user and returns the serialized user objec
 
 Destroys the token on the user, so any further requests with that token will fail.
 
+
+#### GET `/users/all_names?userId=USER_ID&token=USER_TOKEN`
+
+Returns an array of all usernames in the system
+
+```js
+['jack', 'ollie', ...]
+```
+
 #### GET `/users/clusters/own?token=TOKEN&userId=USER_ID`
 
 Returns an array of clusters, each being one the user created.
