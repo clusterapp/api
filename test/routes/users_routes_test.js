@@ -213,6 +213,23 @@ describe('user routes', function() {
     });
   };
 
+  describe('/all_names', function() {
+    it('lists all the user names of every user in the system', function(done) {
+      twoUsers(function(u1, u2) {
+        callRoute('/all_names', {
+          query: { userId: u1.id, token: u1.token }
+        }, {
+          json: function(d) {
+            expect(d.length).to.eql(2);
+            expect(d.indexOf(u2.redditName) > -1).to.eql(true);
+            expect(d.indexOf(u1.redditName) > -1).to.eql(true);
+            done();
+          }
+        });
+      });
+    });
+  });
+
   describe('/id', function() {
     it('gets a user by their id', function(done) {
       twoUsers(function(u1, u2) {
