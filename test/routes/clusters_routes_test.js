@@ -387,6 +387,28 @@ describe('cluster routes', function() {
     });
   });
 
+  describe('/cache_bust', function() {
+    it('clears a cache if one exists', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', subreddits: ['vim'] }
+      }, function(user, cluster) {
+        new ListingCache({ url: 'http://foo.com'}).save(function(e, cache) {
+          callRoute('/cache_bust', {
+            protocol: 'http',
+            get: function() { return 'foo'; },
+            originalUrl: '.com',
+            query: { userId: user.id, token: user.token, clusterId: cluster.id }
+          }, {
+            json: function(d) {
+              expect(d).to.eql({ success: 'cache cleared' });
+              done();
+            }
+          });
+        });
+      });
+    });
+  });
   describe('/listing', function() {
     afterEach(nock.cleanAll);
     it('allows the first page to be accessed without a token if cluster is public', function(done) {
@@ -503,10 +525,10 @@ describe('cluster routes', function() {
             json: function(d) {
               var fullUrl = 'http://localhost:3000/clusters/listing?a=1';
               ListingCache.findOne({ url: 'http://localhost:3000/clusters/listing?a=1'}, function(e, cache) {
-               expect(cache).to.be.ok();
-               expect(cache.data.sorted.length).to.be(5);
-               done();
-             });
+                expect(cache).to.be.ok();
+                expect(cache.data.sorted.length).to.be(5);
+                done();
+              });
             }
           });
         });

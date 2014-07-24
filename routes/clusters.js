@@ -144,6 +144,25 @@ var clusterRoutes = {
       });
     }
   },
+  '/cache_bust': {
+    method: 'get',
+    fn: function(req, res) {
+      validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
+        // http://127.0.0.1:3000/clusters/listing?clusterId=53d01b676cc9a200000a8d73&token=4a4623d38f3a665daa29ec3c554a9128f4065e52fcf84fd883c05bb7e198ee3d&userId=53d01b676cc9a200000a8d6e
+        var url = req.protocol + '://' + req.get('host') + req.originalUrl;
+        url = url.replace('cache_bust', 'listing');
+        ListingCache.findOne({ url: url }, function(e, cache) {
+          if(cache) {
+            cache.remove(function() {
+              res.json({ success: 'cache cleared' });
+            })
+          } else {
+            res.json({ errors: ['no cache to clear'] });
+          }
+        });
+      });
+    }
+  },
   '/create': {
     method: 'post',
     fn: function(req, res) {
