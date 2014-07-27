@@ -39,7 +39,7 @@ require('./routes')(app);
 // development error handler
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-    res.render('error', {
+    res.json({
       message: err.message,
       error: err
     });
@@ -49,10 +49,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+  res.json({ error: err.message });
 });
 
 module.exports = app;
