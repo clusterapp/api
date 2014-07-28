@@ -25,6 +25,7 @@ async.each([User, Cluster, ApiCache, ListingCache], function(c, cb) {
       new Cluster({name: 'lol', subreddits: ['funny', 'tifu'], owner: users.oj206, admins: [], public: false }),
       new Cluster({name: 'football', subreddits: ['nufc', 'soccer'], owner: users.jackfranklin, admins: [], subscribers: [users.bob], public: true }),
       new Cluster({name: 'nerd', subreddits: ['apple', 'gaming'], owner: users.oj206, admins: [users.jackfranklin], subscribers: [users.bob], public: true }),
+      new Cluster({name: 'random', subreddits: ['mufc'], owner: users.oj206, admins: [], subscribers: [], public: true }),
       new Cluster({name: 'talesfrom', subreddits: ['talesfromtechsupport', 'retail'], owner: users.oj206, admins: [], subscribers: [users.jackfranklin], public: true }),
     ];
     async.each(clusters, function(c, cb) {
