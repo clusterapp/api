@@ -286,7 +286,43 @@ describe('cluster routes', function() {
     });
   });
 
-  describe('/update', function() {
+  describe.only('/update', function() {
+    it('does not allow a user to update subscribers if the cluster is private', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', public: false, subreddits: ['vim', 'angularjs'] }
+      }, function(user1, cluster) {
+        User.createWithToken({ redditName: 'dave' }, function(e, user2) {
+          callRoute('/update', {
+            query: { userId: user2.id, token: user2.token, clusterId: cluster.id },
+            body: { subscribers: [user2.id] }
+          }, {
+            json: function(d) {
+              expect(d.errors[0]).to.eql('no permission to update cluster');
+              done();
+            }
+          });
+        });
+      });
+    });
+    it('allows any user to update the subscribers, even if they are not an admin or owner, as long as cluster is public', function(done) {
+      createUserAndCluster({
+        user: { redditName: 'jack' },
+        cluster: { name: 'foo', public: true, subreddits: ['vim', 'angularjs'] }
+      }, function(user1, cluster) {
+        User.createWithToken({ redditName: 'dave' }, function(e, user2) {
+          callRoute('/update', {
+            query: { userId: user2.id, token: user2.token, clusterId: cluster.id },
+            body: { subscribers: [user2.id] }
+          }, {
+            json: function(d) {
+              expect(d.subscribers[0].id).to.eql(user2.id);
+              done();
+            }
+          });
+        });
+      });
+    });
     it('updates the cluster', function(done) {
       createUserAndCluster({
         user: { redditName: 'jack' },
