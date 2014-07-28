@@ -286,7 +286,7 @@ describe('cluster routes', function() {
     });
   });
 
-  describe.only('/update', function() {
+  describe('/update', function() {
     it('does not allow a user to update subscribers if the cluster is private', function(done) {
       createUserAndCluster({
         user: { redditName: 'jack' },
