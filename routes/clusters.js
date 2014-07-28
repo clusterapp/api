@@ -183,7 +183,11 @@ var clusterRoutes = {
 
         // we have to do this and not update because an update skips validations
         Cluster.findById(req.query.clusterId, function(e, cluster) {
-          if(!cluster.userIdCanEdit(req.query.userId)) {
+          var hasPerm = false;
+          if(Object.keys(req.body).length === 1 && Object.keys(req.body)[0] === 'subscribers') {
+            hasPerm = true;
+          }
+          if(!hasPerm && !cluster.userIdCanEdit(req.query.userId)) {
             return res.json({ errors: ['no permission to update cluster'] });
           }
           for(var key in req.body) {
