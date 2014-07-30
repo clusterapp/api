@@ -33,7 +33,8 @@ describe('auth routes', function() {
         }
       });
     });
-    it.only('redirects with the user details if the env var is set', function(done) {
+
+    it('redirects with the user details if the env var is set', function(done) {
       callRoute('/test_stub_oauth', {
         query: { redirect: 'foo', name: 'jack' }
       }, {
