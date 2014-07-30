@@ -33,13 +33,12 @@ describe('auth routes', function() {
         }
       });
     });
-    it('returns a user if the env var is set', function(done) {
+    it.only('redirects with the user details if the env var is set', function(done) {
       callRoute('/test_stub_oauth', {
         query: { redirect: 'foo', name: 'jack' }
       }, {
-        json: function(d) {
-          expect(d.user_name).to.eql('jack');
-          expect(d.token).to.be.ok();
+        redirect: function(loc) {
+          expect(loc).to.match(/foo\?user_id=.+&user_name=jack&token=.+&last_active=.+/);
           done();
         }
       });

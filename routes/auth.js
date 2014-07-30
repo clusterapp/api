@@ -18,13 +18,7 @@ var authRoutes = {
         session: { redirect: req.query.redirect }
       }, {
         redirect: function(data) {
-          var query = data.split('?')[1];
-          var user = {};
-          query.split('&').forEach(function(param) {
-            var parts = param.split('=');
-            user[parts[0]] = parts[1];
-          });
-          res.json(user);
+          res.redirect(data);
         }
       });
     }
