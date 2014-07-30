@@ -181,18 +181,26 @@ var clusterRoutes = {
       validateParamsExist(['userId', 'token', 'clusterId'], req, res, function(valid) {
         if(!valid) return;
 
-        // we have to do this and not update because an update skips validations
-        Cluster.findById(req.query.clusterId, function(e, cluster) {
-          if(!cluster.userIdCanEdit(req.query.userId)) {
-            return res.json({ errors: ['no permission to update cluster'] });
-          }
-          for(var key in req.body) {
-            cluster[key] = req.body[key];
+        var updateCluster = function(cluster, data) {
+          for(var key in data) {
+            cluster[key] = data[key];
           }
           cluster.save(function(e, cluster) {
             if(e) return res.json(formatValidationErrors(e));
             cluster.serialize(res.json.bind(res));
           });
+        };
+        var onlyEditingSubscribers = function(cluster, body) {
+          return (cluster.public === true && Object.keys(body).length === 1 && Object.keys(body)[0] === 'subscribers');
+        };
+
+        // we have to do this and not update because an update skips validations
+        Cluster.findById(req.query.clusterId, function(e, cluster) {
+          if(onlyEditingSubscribers(cluster, req.body) || cluster.userIdCanEdit(req.query.userId)) {
+            return updateCluster(cluster, req.body);
+          } else {
+            return res.json({ errors: ['no permission to update cluster'] });
+          }
         });
       });
     }
