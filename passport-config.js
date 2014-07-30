@@ -13,25 +13,30 @@ module.exports = function(app) {
     done(null, obj);
   });
 
+  var authCodes;
   if(process.env.NODE_ENV && process.env.NODE_ENV == 'test') {
-    var authCodes = {};
-    authCodes.test = {
+    authCodes = {
       redditKey: 'baZ1VtnPyWCQNA',
       redditSecret: 'JIqQAUjIlJf1cGKoFOsTlh-fWHA'
     }
+  } else if(process.env.NODE_ENV && process.env.NODE_ENV == 'production') {
+    authCodes = {
+      redditKey: process.env.REDDIT_KEY,
+      redditSecret: process.env.REDDIT_SECRET
+    }
   } else {
-    var authCodes = require('./keys.json');
+    authCodes = require('./keys.json');
   }
 
   var env = process.env.NODE_ENV || 'development';
   var callbackUrl = (env == 'development' || env == 'test' ?
                      'http://127.0.0.1:3000/auth/reddit/callback' :
-                     'http://192.241.141.125/auth/reddit/callback'
+                     'http://clusterapp-api.herokuapp.com/auth/reddit/callback'
   );
 
   passport.use(new RedditStrategy({
-    clientID: authCodes[env].redditKey,
-    clientSecret: authCodes[env].redditSecret,
+    clientID: authCodes.redditKey,
+    clientSecret: authCodes.redditSecret,
     callbackURL: callbackUrl
   }, function(accessToken, refreshToken, profile, done) {
     return done(null, profile);
