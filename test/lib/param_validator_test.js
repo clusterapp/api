@@ -4,6 +4,13 @@ var validateParamsExist = require('../../lib/param_validator');
 var User = require('../../models/user_model');
 
 describe('param validator', function() {
+  it('lets the test token request through', function(done) {
+     validateParamsExist(['token'], { query: { token: 'TESTABC123' } }, {}, function(res) {
+      expect(res).to.eql(true);
+      done();
+    });
+  });
+
   it('errors if no params at all given', function(done) {
     validateParamsExist([], {}, {
       json: function(d) {

@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "NODE_ENV=test ./node_modules/.bin/mocha test --recursive",
+    "test": "NODE_ENV=test TEST_TOKEN=TESTABC123 ./node_modules/.bin/mocha test --recursive",
     "test_spec": "NODE_ENV=test ./node_modules/.bin/mocha test --recursive --reporter spec",
     "seed": "NODE_ENV=development node seed.js"
   },
