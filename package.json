@@ -26,6 +26,7 @@
     "passport": "0.2.0",
     "passport-reddit": "0.2.4",
     "reddit-wrapper": "0.0.5",
+    "request": "^2.39.0",
     "underscore": "1.6.0"
   },
   "devDependencies": {
