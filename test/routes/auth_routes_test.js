@@ -22,6 +22,31 @@ var callRoute = function(route, req, res) {
 };
 
 describe('auth routes', function() {
+  describe('/test_stub_oauth', function() {
+    it('errors if the env variable is not set', function() {
+      var oldToken =  '' + process.env.TEST_TOKEN;
+      process.env.TEST_TOKEN = undefined;
+      callRoute('/test_stub_oauth', {}, {
+        json: function(d) {
+          expect(d).to.eql({ error: 'forbidden' });
+          process.env.TEST_TOKEN = oldToken;
+        }
+      });
+    });
+
+    it('redirects with the user details if the env var is set', function(done) {
+      callRoute('/test_stub_oauth', {
+        query: { redirect: 'foo', name: 'jack' }
+      }, {
+        redirect: function(loc) {
+          expect(loc).to.match(/foo\?user_id=.+&user_name=jack&token=.+&last_active=.+/);
+          done();
+        }
+      });
+    });
+  });
+
+
   describe('/reddit', function() {
     it('errors if not given a query parameter', function() {
       callRoute('/reddit', {}, {

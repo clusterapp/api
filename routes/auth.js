@@ -8,6 +8,21 @@ var User = require('../models/user_model');
 var ERRORS = require('../lib/error_messages');
 
 var authRoutes = {
+  '/test_stub_oauth': {
+    method: 'get',
+    fn: function(req, res) {
+      if(!process.env.TEST_TOKEN || process.env.TEST_TOKEN == 'undefined') return res.json({ error: 'forbidden' });
+      // basically have to create a new user, and then return just as if it was proper oauth
+      authRoutes['/reddit/success'].fn({
+        user: { name: req.query.name },
+        session: { redirect: req.query.redirect }
+      }, {
+        redirect: function(data) {
+          res.redirect(data);
+        }
+      });
+    }
+  },
   '/reddit': {
     method: 'get',
     fn: function(req, res, next) {
