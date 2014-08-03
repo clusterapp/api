@@ -10,4 +10,5 @@ module.exports = function(app) {
   app.use('/auth', require('./auth').router);
   app.use('/clusters', require('./clusters').router);
   app.use('/reddit', require('./reddit').router);
+  app.use('/testing', require('./testing').router);
 };
