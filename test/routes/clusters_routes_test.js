@@ -10,7 +10,7 @@ var nock = require('nock');
 var sinon = require('sinon');
 
 
-var Double = require('doubler');
+var Double = require('doubler').Double;
 
 
 require('../test_db_config');

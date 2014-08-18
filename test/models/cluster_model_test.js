@@ -2,7 +2,7 @@ var Cluster = require('../../models/cluster_model');
 var User = require('../../models/user_model');
 var expect = require('expect.js');
 var async = require('async');
-var Double = require('doubler');
+var Double = require('doubler').Double;
 
 require('../test_db_config');
 require('../shorter_stack_traces');
