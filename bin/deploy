@@ -5,7 +5,7 @@ var async = require('async');
 
 
 var config = require('../deploy.json');
-var branch = 'master';
+var branch = process.argv[2] || 'master';
 
 var ip = process.env.SERVER_IP;
 
@@ -16,12 +16,14 @@ function runCmd(cmd, cb) {
   cmd = config.prefix + ' && cd ' + config.location + ' && ' + cmd;
   conn.exec(cmd, {pty: true }, function(err, stream) {
     stream.on('data', function(data) {
+      if(cmd.indexOf('npm install') > -1) return;
       if(!!data) console.log('' + data);
     }).stderr.on('data', function(data) {
       console.log('ERR' + data);
+      return cb(err);
     }).on('close', function() {
       console.log('Finished command');
-      cb();
+      return cb();
     });
   });
 }
@@ -36,15 +38,10 @@ var COMMANDS = [
 
 conn.on('ready', function() {
   console.log('connection ready');
-  var cmd = COMMANDS.join(' && ');
-  runCmd(cmd, function() {
-    console.log('done');
+  async.eachSeries(COMMANDS, runCmd, function() {
+    console.log('Finished');
     conn.end();
   });
-  // async.eachSeries(COMMANDS, runCmd, function() {
-  //   console.log('Finished');
-  //   conn.end();
-  // });
 }).connect({
   host: ip,
   username: 'root',
