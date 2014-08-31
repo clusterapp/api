@@ -9,7 +9,8 @@
     "start": "node ./bin/www",
     "test": "NODE_ENV=test TEST_TOKEN=TESTABC123 ./node_modules/.bin/mocha test --recursive",
     "test_spec": "NODE_ENV=test ./node_modules/.bin/mocha test --recursive --reporter spec",
-    "seed": "NODE_ENV=development node seed.js"
+    "seed": "NODE_ENV=development node seed.js",
+    "deploy": "./node_modules/cluster-deploy/deploy deploy.json"
   },
   "dependencies": {
     "async": "^0.9.0",
@@ -31,6 +32,7 @@
     "underscore": "1.6.0"
   },
   "devDependencies": {
+    "cluster-deploy": "0.0.1",
     "doubler": "^0.2.1",
     "expect.js": "0.3.1",
     "mocha": "1.20.1",
