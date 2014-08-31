@@ -26,8 +26,7 @@ function runCmd(cmd, cb) {
 var conn = new Connection();
 
 var COMMANDS = [
-  'source /root/.profile',
-  'nvm',
+  './bin/forever_start',
 ]
 
 conn.on('ready', function() {
