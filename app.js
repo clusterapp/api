@@ -20,27 +20,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-if(process.env.NODE_ENV === 'production') {
-  app.use(session({
-    store: new RedisStore({
-      url: process.env.REDISTOGO_URL
-    }),
-    secret: 'keyboard cat',
-    saveUninitialized: true,
-    resave: true
-  }));
-} else {
-  app.use(session({
-    store: new RedisStore({
-      host: "127.0.0.1",
-      port: 6379,
-      db: 2
-    }),
-    secret: 'keyboard cat',
-    saveUninitialized: true,
-    resave: true
-  }));
-}
+app.use(session({
+  store: new RedisStore({
+    host: "127.0.0.1",
+    port: 6379,
+    db: 2
+  }),
+  secret: 'keyboard cat',
+  saveUninitialized: true,
+  resave: true
+}));
 
 require('./passport-config')(app);
 
