@@ -37,10 +37,15 @@ var COMMANDS = [
 
 conn.on('ready', function() {
   console.log('connection ready');
-  async.eachSeries(COMMANDS, runCmd, function() {
-    console.log('Finished');
+  var cmd = COMMANDS.join(' && ');
+  runCmd(cmd, function() {
+    console.log('done');
     conn.end();
   });
+  // async.eachSeries(COMMANDS, runCmd, function() {
+  //   console.log('Finished');
+  //   conn.end();
+  // });
 }).connect({
   host: ip,
   username: 'root',
