@@ -16,21 +16,25 @@ function runCmd(cmd, cb) {
   cmd = 'cd ' + config.location + ' && ' + cmd;
   conn.exec(cmd, function(err, stream) {
     stream.on('data', function(data) {
-      console.log('STDOUT: ' + data);
+      console.log('' + data);
     }).stderr.on('data', function(data) {
-      console.log('STDERR: ' + data);
+      console.log('' + data);
     }).on('close', function() { cb(); });
   });
 }
 
 var conn = new Connection();
 
+var COMMANDS = [
+  'git pull',
+  'git checkout ' + branch
+].concat(config.post_checkout);
+
 conn.on('ready', function() {
   console.log('connection ready');
-  async.eachSeries([
-    'ls'
-  ], runCmd, function() {
+  async.eachSeries(COMMANDS, runCmd, function() {
     console.log('Finished');
+    conn.end();
   });
 }).connect({
   host: ip,
