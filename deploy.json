@@ -1,5 +1,7 @@
 {
   "location": "/www/api",
+  "stop_server": "/root/.nvm/v0.10.31/bin/forever -c /root/.nvm/v0.10.31/bin/node stop bin/www",
+  "start_server": "/root/.nvm/v0.10.31/bin/forever -c /root/.nvm/v0.10.31/bin/node start bin/www",
   "post_checkout": [
     "/root/.nvm/v0.10.31/bin/npm install"
   ]

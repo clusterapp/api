@@ -14,11 +14,11 @@ console.log('Deploying ', branch, 'to', ip);
 function runCmd(cmd, cb) {
   console.log('Running', cmd);
   cmd = 'cd ' + config.location + ' && ' + cmd;
-  conn.exec(cmd, function(err, stream) {
+  conn.exec(cmd, {pty: true }, function(err, stream) {
     stream.on('data', function(data) {
-      console.log('' + data);
+      console.log('OUT' + data);
     }).stderr.on('data', function(data) {
-      console.log('' + data);
+      console.log('ERR' + data);
     }).on('close', function() { cb(); });
   });
 }
@@ -26,9 +26,9 @@ function runCmd(cmd, cb) {
 var conn = new Connection();
 
 var COMMANDS = [
-  'git pull',
-  'git checkout ' + branch
-].concat(config.post_checkout);
+  'source /root/.profile',
+  'nvm',
+]
 
 conn.on('ready', function() {
   console.log('connection ready');
