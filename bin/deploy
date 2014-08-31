@@ -13,21 +13,28 @@ console.log('Deploying ', branch, 'to', ip);
 
 function runCmd(cmd, cb) {
   console.log('Running', cmd);
-  cmd = 'cd ' + config.location + ' && ' + cmd;
+  cmdPrefix = '. $HOME/.profile';
+  cmd = cmdPrefix + ' && cd ' + config.location + ' && ' + cmd;
   conn.exec(cmd, {pty: true }, function(err, stream) {
     stream.on('data', function(data) {
-      console.log('OUT' + data);
+      if(cmd.indexOf('npm install') > -1) return;
+      if(!!data) console.log('' + data);
     }).stderr.on('data', function(data) {
       console.log('ERR' + data);
-    }).on('close', function() { cb(); });
+    }).on('close', function() {
+      console.log('Finished command');
+      cb();
+    });
   });
 }
 
 var conn = new Connection();
 
 var COMMANDS = [
-  './bin/forever_start',
-]
+  config.stop_server,
+  'git pull',
+  'git checkout ' + branch,
+].concat(config.post_checkout).concat([config.start_server]);
 
 conn.on('ready', function() {
   console.log('connection ready');
