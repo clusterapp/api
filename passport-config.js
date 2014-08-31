@@ -18,6 +18,13 @@ module.exports = function(app) {
     redditSecret: process.env.REDDIT_SECRET
   }
 
+  if(process.env.NODE_ENV === 'test') {
+    authCodes = {
+      redditKey: 'baZ1VtnPyWCQNA',
+      redditSecret: 'JIqQAUjIlJf1cGKoFOsTlh-fWHA'
+    }
+  }
+
   var env = process.env.NODE_ENV || 'development';
   var callbackUrl = (env == 'development' || env == 'test' ?
                      'http://127.0.0.1:3000/auth/reddit/callback' :
