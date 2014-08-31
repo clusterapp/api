@@ -38,8 +38,9 @@ var COMMANDS = [
 
 conn.on('ready', function() {
   console.log('connection ready');
-  async.eachSeries(COMMANDS, runCmd, function() {
+  async.eachSeries(COMMANDS, runCmd, function(e) {
     console.log('Finished');
+    if(e) console.log(e);
     conn.end();
   });
 }).connect({
