@@ -37,6 +37,7 @@
     "proxyquire": "1.0.1",
     "request": "2.37.0",
     "sinon": "^1.10.3",
+    "ssh2": "^0.3.6",
     "supertest": "0.13.0",
     "timekeeper": "0.0.4"
   }

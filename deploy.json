@@ -1,0 +1,6 @@
+{
+  "location": "/www/api",
+  "post_checkout": [
+    "/root/.nvm/v0.10.31/bin/npm install"
+  ]
+}
