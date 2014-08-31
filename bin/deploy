@@ -16,7 +16,6 @@ function runCmd(cmd, cb) {
   cmd = config.prefix + ' && cd ' + config.location + ' && ' + cmd;
   conn.exec(cmd, {pty: true }, function(err, stream) {
     stream.on('data', function(data) {
-      if(cmd.indexOf('npm install') > -1) return;
       if(!!data) console.log('' + data);
     }).stderr.on('data', function(data) {
       console.log('ERR' + data);
