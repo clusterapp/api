@@ -13,19 +13,9 @@ module.exports = function(app) {
     done(null, obj);
   });
 
-  var authCodes;
-  if(process.env.NODE_ENV && process.env.NODE_ENV == 'test') {
-    authCodes = {
-      redditKey: 'baZ1VtnPyWCQNA',
-      redditSecret: 'JIqQAUjIlJf1cGKoFOsTlh-fWHA'
-    }
-  } else if(process.env.NODE_ENV && process.env.NODE_ENV == 'production') {
-    authCodes = {
-      redditKey: process.env.REDDIT_KEY,
-      redditSecret: process.env.REDDIT_SECRET
-    }
-  } else {
-    authCodes = require('./keys.json');
+  var authCodes = {
+    redditKey: process.env.REDDIT_KEY,
+    redditSecret: process.env.REDDIT_SECRET
   }
 
   var env = process.env.NODE_ENV || 'development';
