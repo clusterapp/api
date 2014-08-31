@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+var Connection = require('ssh2');
+var async = require('async');
+
+
+var config = require('../deploy.json');
+var branch = 'master';
+
+var ip = process.env.SERVER_IP;
+
+console.log('Deploying ', branch, 'to', ip);
+
+function runCmd(cmd, cb) {
+  console.log('Running', cmd);
+  cmd = 'cd ' + config.location + ' && ' + cmd;
+  conn.exec(cmd, function(err, stream) {
+    stream.on('data', function(data) {
+      console.log('STDOUT: ' + data);
+    }).stderr.on('data', function(data) {
+      console.log('STDERR: ' + data);
+    }).on('close', function() { cb(); });
+  });
+}
+
+var conn = new Connection();
+
+conn.on('ready', function() {
+  console.log('connection ready');
+  async.eachSeries([
+    'ls'
+  ], runCmd, function() {
+    console.log('Finished');
+  });
+}).connect({
+  host: ip,
+  username: 'root',
+  privateKey: require('fs').readFileSync('/Users/jackfranklin/.ssh/id_rsa')
+});

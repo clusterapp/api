@@ -1,0 +1,6 @@
+{
+  "location": "/www/api",
+  "post_checkout": [
+    "npm install"
+  ]
+}
