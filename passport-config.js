@@ -28,7 +28,7 @@ module.exports = function(app) {
   var env = process.env.NODE_ENV || 'development';
   var callbackUrl = (env == 'development' || env == 'test' ?
                      'http://127.0.0.1:3000/auth/reddit/callback' :
-                     'http://clusterapp-api.herokuapp.com/auth/reddit/callback'
+                     'http://clusterit.me/auth/reddit/callback'
   );
 
   passport.use(new RedditStrategy({
